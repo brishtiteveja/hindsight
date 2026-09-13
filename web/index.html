@@ -8,6 +8,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="style.css?v=19"/>
+<!-- In-studio agent. CopilotKit's stylesheet is scoped under [data-copilotkit]
+     with cpk:-prefixed utilities, so it cannot reach the studio's own styles. -->
+<link rel="stylesheet" href="agent/hs-agent.css"/>
 </head>
 <body>
 <header id="topbar">
@@ -384,8 +387,12 @@
   <span>Hindsight · own-channel-first transcript intelligence · MIT</span>
 </footer>
 <script src="https://www.youtube.com/iframe_api"></script>
-<script src="app.js?v=21"></script>
+<script src="app.js?v=22"></script>
 <script src="galaxy.js?v=6"></script>
 <script src="cut.js?v=2"></script>
+<!-- The agent island mounts here. Loaded last so the studio's bridge functions
+     (hsOpenLens / hsPlayMoment / hsContext) exist before any tool can fire. -->
+<div id="hs-agent"></div>
+<script type="module" src="agent/hs-agent.js"></script>
 </body>
 </html>

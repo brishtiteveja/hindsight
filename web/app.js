@@ -222,6 +222,7 @@ async function renderTimeline() {
 /* ── channel view ── */
 async function loadChannel(slug) {
   CH = slug;
+  window.hsContext && hsBroadcast();   // tell the agent which channel is open
   $("chat-log").innerHTML = $("chat-log").innerHTML; // keep hint node
   resetChat();
   const p = await api(`v1/channels/${slug}/persona`).catch(() => null);
@@ -1239,3 +1240,37 @@ function progressInto(el, stages, skeleton = 3) {
     },
   };
 }
+
+/* ── agent bridge ──
+   The in-studio agent (web/agent/, built from agent-ui/) runs in its own React
+   island and cannot see this script's scope, so the few things it needs are
+   published here deliberately rather than by making internals global.
+
+   Two directions:
+     * hsOpenLens / hsPlayMoment — the agent's browser tools call these, so it
+       drives the same code paths a click does instead of a parallel one.
+     * hs:context — broadcast on every change, so the agent's view of "what is
+       on screen" stays current between turns. */
+let HS_LENS = "chat";
+
+function hsBroadcast() {
+  window.dispatchEvent(new CustomEvent("hs:context", {
+    detail: { channel: CH, lens: HS_LENS },
+  }));
+}
+
+window.hsContext = () => ({ channel: CH, lens: HS_LENS });
+
+window.hsOpenLens = (name) => {
+  setLens(name);
+  HS_LENS = name;
+  hsBroadcast();
+};
+
+window.hsPlayMoment = (videoId, second, note) => play(videoId, second, note || "");
+
+// Keep the broadcast honest when the user navigates by hand.
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("#lens-nav button");
+  if (b) { HS_LENS = b.dataset.lens; hsBroadcast(); }
+});

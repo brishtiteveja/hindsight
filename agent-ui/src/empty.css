@@ -1,0 +1,2 @@
+/* Intentionally empty — stands in for katex.min.css so its ~1.4MB of base64
+   webfonts stays out of the bundle. Math renders with system fonts. */

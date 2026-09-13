@@ -115,14 +115,29 @@ def run_agui(body: dict):
     # the "context awareness" half of being an in-app agent.
     forwarded = body.get("forwardedProps") or {}
     channel = forwarded.get("channel") or ""
+    context_lines: list[str] = []
     for ctx in body.get("context") or []:
-        if ctx.get("description", "").lower().startswith("channel") and not channel:
-            channel = ctx.get("value") or ""
+        raw = ctx.get("value")
+        # useAgentContext JSON-stringifies its value before sending.
+        parsed = raw
+        if isinstance(raw, str):
+            try:
+                parsed = json.loads(raw)
+            except json.JSONDecodeError:
+                parsed = raw
+        if isinstance(parsed, dict) and not channel and parsed.get("channel"):
+            channel = parsed["channel"]
+        context_lines.append(f"- {ctx.get('description', 'context')}: "
+                             f"{json.dumps(parsed, default=str)}")
 
     yield _event({"type": "RUN_STARTED", "threadId": thread_id, "runId": run_id})
 
     try:
-        convo = [{"role": "system", "content": _system(channel or None)}]
+        system = _system(channel or None)
+        if context_lines:
+            system += ("\n\nWhat the user currently has on screen:\n"
+                       + "\n".join(context_lines))
+        convo = [{"role": "system", "content": system}]
         convo += _to_openai(body.get("messages") or [])
 
         ui_schemas, ui_names = _client_tools(body.get("tools") or [])
