@@ -1379,3 +1379,12 @@ function hsInvestigateStory() {
   hsBroadcast();
   window.dispatchEvent(new CustomEvent("hs:open-agent"));
 }
+
+function homeIsYouTube(value){try{const url=new URL(/^https?:/i.test(value)?value:`https://${value}`);return /(^|\.)youtube\.com$/.test(url.hostname)||url.hostname==='youtu.be';}catch{return false;}}
+function homeQueryLabel(){$("home-query-go").textContent=homeIsYouTube($("home-query").value.trim())?'Add this video':'Search archive';}
+async function homeDiscover(event){
+  event.preventDefault();const value=$("home-query").value.trim();if(!value){$("home-query").focus();return false;}
+  if(homeIsYouTube(value)){go('onboard');$("ob-urls").value=value;$("ob-note").textContent='Your link is ready. Build its memory from available captions.';$("ob-go").focus();return false;}
+  await go('galaxy');if(!G)return false;gxReset();$("gx-search").value=value;gxSearch(value);fitGalaxyMatches();return false;
+}
+function homeDrop(event){event.preventDefault();event.currentTarget.classList.remove('is-dragging');const text=event.dataTransfer.getData('text/uri-list')||event.dataTransfer.getData('text/plain');if(text){$("home-query").value=text.trim().split('\n')[0];homeQueryLabel();$("home-query").focus();}}

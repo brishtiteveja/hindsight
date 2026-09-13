@@ -11,6 +11,9 @@ let gHover = -1;
 let gFilter = { q: "", lean: -1, issue: -1 };
 let gMatch = null;            // Uint8Array — 1 when a point passes the filter
 let gRaf = 0;
+let gThumbMode = true;
+const gThumbImages = new Map();
+let gThumbHits = [];
 
 const GRID = 40;              // world units per hover cell
 
@@ -75,7 +78,7 @@ function drawGalaxy() {
   ctx.clearRect(0, 0, w, h);
 
   const filtering = gFilter.q || gFilter.lean >= 0 || gFilter.issue >= 0;
-  const r = Math.max(1.5, Math.min(5.5, 2.2 * gView.k * 6));
+  const r = gThumbMode ? Math.max(1, Math.min(2.6, 1.6 * gView.k)) : Math.max(1.5, Math.min(5.5, 2.2 * gView.k * 6));
 
   // Batched drawing: one Path2D + one fill per hue (16 fills, not 23K) —
   // the difference between chugging and butter while zooming.
@@ -111,6 +114,8 @@ function drawGalaxy() {
     ctx.fill(paths[hi]);
   }
   ctx.globalAlpha = 1;
+
+  if (gThumbMode) drawGalaxyThumbnails(ctx,w,h);
 
   // hovered point gets a ring
   if (gHover >= 0) {
@@ -186,6 +191,9 @@ function easeZoom() {
 }
 
 function pickPoint(px, py) {
+  if (gThumbMode) for (const hit of gThumbHits) {
+    if ((sx(G.x[hit.i])-px)**2+(sy(G.y[hit.i])-py)**2 <= (hit.worldRadius*gView.k)**2) return hit.i;
+  }
   const x = wx(px), y = wy(py);
   const cx = (x / GRID) | 0, cy = (y / GRID) | 0;
   let best = -1, bestD = (14 / gView.k) ** 2;
@@ -291,7 +299,7 @@ function applyGxFilter() {
     if (gFilter.lean >= 0 && G.l[i] !== gFilter.lean) ok = 0;
     if (ok && gFilter.issue >= 0 && G.i[i] !== gFilter.issue) ok = 0;
     if (ok && q) {
-      const hay = G.t[i] + " " + G.channel_names[G.c[i]];
+      const hay = G.t[i] + " " + G.channel_names[G.c[i]] + " " + G.issues[G.i[i]].replace(/_/g," ");
       if (!hay.toLowerCase().includes(q)) ok = 0;
     }
     gMatch[i] = ok;
@@ -325,8 +333,7 @@ function gxIssue(n) {
     b.classList.toggle("on", +b.dataset.issue === gFilter.issue));
   applyGxFilter();
   if (gFilter.issue >= 0) {
-    const l = G.labels.find((x) => x.key === G.issues[gFilter.issue]);
-    if (l) zoomTo(l.x, l.y, 2.6);
+    fitGalaxyMatches();
   }
 }
 function gxReset() {
@@ -488,5 +495,34 @@ async function homeOpenCluster(key) {
   await go("galaxy");
   if(!G) return;
   const idx=G.issues.indexOf(key);
-  if(idx>=0){gFilter.issue=-1;gxIssue(idx);}
+  if(idx>=0){gxReset();gxIssue(idx);}
+}
+
+function fitGalaxyMatches() {
+  if (!G) return;
+  const cv=$("gx-canvas"), w=cv.clientWidth,h=cv.clientHeight;
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  for(let i=0;i<G.n;i++) if(gMatch[i]){minX=Math.min(minX,G.x[i]);maxX=Math.max(maxX,G.x[i]);minY=Math.min(minY,G.y[i]);maxY=Math.max(maxY,G.y[i]);}
+  if(!Number.isFinite(minX)){fitGalaxy();return;}
+  const left=w>720?280:24, right=35, top=90, bottom=95;
+  const k=Math.min((w-left-right)/Math.max(100,maxX-minX+90),(h-top-bottom)/Math.max(100,maxY-minY+90),3);
+  gZoomAnim=null;gView.k=k;gView.x=left+(w-left-right)/2-(minX+maxX)/2*k;gView.y=top+(h-top-bottom)/2-(minY+maxY)/2*k;
+  queueDraw();
+}
+function gxToggleThumbnails(){gThumbMode=!gThumbMode;$("gx-thumbnails").textContent=`Video thumbnails ${gThumbMode?'on':'off'}`;$("gx-thumbnails").setAttribute('aria-pressed',String(gThumbMode));queueDraw();}
+function drawGalaxyThumbnails(ctx,w,h){
+  gThumbHits=[];
+  const occupied=new Set();let count=0;const size=32;
+  for(let i=0;i<G.n&&count<44;i++){
+    if(!gMatch[i])continue;
+    const px=sx(G.x[i]),py=sy(G.y[i]);
+    if(px<12||py<80||px>w-20||py>h-80||(w>720&&px<280))continue;
+    const cell=`${Math.floor(px/74)}:${Math.floor(py/74)}`;if(occupied.has(cell))continue;occupied.add(cell);count++;
+    const id=G.v[i];let img=gThumbImages.get(id);
+    if(!img){img=new Image();img.onload=()=>{if(!$("view-galaxy").hidden)queueDraw();};img.src=`https://i.ytimg.com/vi/${encodeURIComponent(id)}/default.jpg`;gThumbImages.set(id,img);if(gThumbImages.size>220)gThumbImages.delete(gThumbImages.keys().next().value);}
+    if(!img.complete||!img.naturalWidth)continue;
+    gThumbHits.push({i,worldRadius:size/(2*gView.k)});
+    ctx.save();ctx.beginPath();ctx.arc(px,py,size/2,0,Math.PI*2);ctx.clip();const side=Math.min(img.naturalWidth,img.naturalHeight);ctx.drawImage(img,(img.naturalWidth-side)/2,(img.naturalHeight-side)/2,side,side,px-size/2,py-size/2,size,size);ctx.restore();
+    ctx.beginPath();ctx.arc(px,py,size/2,0,Math.PI*2);ctx.strokeStyle=G.hues[G.i[i]];ctx.lineWidth=1.5;ctx.stroke();
+  }
 }

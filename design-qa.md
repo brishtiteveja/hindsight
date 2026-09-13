@@ -14,6 +14,8 @@ Implementation: `docs/images/home.png`, `docs/images/investigation.png`; desktop
 
 - P2 fixed: rapid navigation could schedule a draw on a hidden, zero-size Galaxy canvas. Render guards now skip hidden or zero-size canvases.
 
+- Discovery update: central keyword/YouTube-link entry, prominent Add a video action, viewport-fitted clusters, optional bounded thumbnail markers and a GitHub header link. Keyword filtering and URL handoff were checked in the browser; arbitrary-video caption ingestion is not newly verified.
+
 ## Fidelity and behavior
 
 Typography: Fraunces display and Inter interface text match the studio; smaller than the illustrative concept to accommodate actual context and controls. Spacing uses a distinct header, readable content and bottom composer. Colors use warm black, cream, amber and mint. Source images are real YouTube thumbnails with stable source IDs. UI icons come from the installed icon library. Copy describes persistent archive memory without claiming personal-memory persistence. The featured story identifies interpretation and attribution limits.

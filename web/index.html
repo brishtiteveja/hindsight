@@ -7,7 +7,7 @@
 <meta name="description" content="Every channel remembers what it said. Chat with a channel's history, watch its framing evolve, see the receipts."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="style.css?v=21"/>
+<link rel="stylesheet" href="style.css?v=23"/>
 <!-- In-studio agent. CopilotKit's stylesheet is scoped under [data-copilotkit]
      with cpk:-prefixed utilities, so it cannot reach the studio's own styles. -->
 <link rel="stylesheet" href="agent/hs-agent.css?v=2"/>
@@ -33,9 +33,10 @@
         <button data-nav="liars" onclick="go('liars')">⚡ Who's lying?</button>
       </div>
     </div>
-    <button class="nav-add" onclick="go('onboard')">＋ Add your channel</button>
+    <button class="nav-add" onclick="go('onboard')">＋ Add a video</button>
   </nav>
   <div class="tagline">the YouTube narrative map</div>
+  <a class="repo-link" href="https://github.com/brishtiteveja/hindsight" target="_blank" rel="noopener noreferrer" aria-label="Hindsight source code on GitHub (opens in a new tab)"><img src="icons/github.svg" width="18" height="18" alt=""/>GitHub</a>
 </header>
 
 <!-- ══ GALAXY ══ -->
@@ -49,6 +50,11 @@
       <div class="gx-intro-actions"><button class="gx-primary" onclick="go('galaxy')">Explore the galaxy</button><button class="gx-secondary" onclick="document.getElementById('gx-story').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'})">Follow a story</button></div>
       <div class="gx-provenance">Persistent archive memory<br/><span>Transcripts collected by Perspectivity.co</span></div>
     </section>
+    <form class="home-discovery" onsubmit="event.preventDefault();homeDiscover(event);return false" ondragover="event.preventDefault();this.classList.add('is-dragging')" ondragleave="this.classList.remove('is-dragging')" ondrop="homeDrop(event)">
+      <label for="home-query">YOUR NEXT INVESTIGATION STARTS HERE</label>
+      <div><input id="home-query" placeholder="Search a topic, creator, or paste a YouTube link…" autocomplete="off" oninput="homeQueryLabel()"/><button id="home-query-go" type="submit">Search archive</button></div>
+      <span>Find videos in the map · Drop a YouTube link to build its memory</span>
+    </form>
     <button id="gx-motion" class="gx-motion" onclick="gxToggleMotion()" aria-pressed="false">Pause motion</button>
     <div id="home-galaxy-tip" class="home-galaxy-tip" hidden></div>
     <div id="home-cluster-labels" class="home-cluster-labels"></div>
@@ -84,6 +90,7 @@
         <button onclick="gxLean(2)">Right</button>
       </div>
       <div id="gx-issues" class="gx-issues"></div>
+      <button id="gx-thumbnails" class="gx-reset" onclick="gxToggleThumbnails()" aria-pressed="true">Video thumbnails on</button>
       <button class="gx-reset" onclick="gxReset()">reset view</button>
       <button class="gx-investigate" onclick="gxInvestigate()">Investigate this selection</button>
     </div>
@@ -173,7 +180,7 @@
 <!-- ══ ONBOARD: add your channel ══ -->
 <main id="view-onboard" class="view" hidden>
   <div class="ob-wrap">
-    <h1>Drop <em>any</em> videos</h1>
+    <div class="gx-kicker">BRING YOUR OWN SOURCE</div><h1>Turn a video into <em>memory.</em></h1>
     <p class="ob-sub">Paste YouTube links — we fetch the captions on demand, analyze them, and
        the whole studio unlocks. No setup: we detect the channel from the video itself, and
        new drops append to a channel you've already built. Own-channel-first: use it on
@@ -183,7 +190,7 @@
       <textarea id="ob-urls" placeholder="One YouTube link (or video ID) per line — up to 12 videos&#10;https://www.youtube.com/watch?v=…&#10;https://youtu.be/…"></textarea>
       <div class="ob-actions">
         <button class="pf-run" id="ob-go" onclick="startOnboard()">Build my channel memory</button>
-        <span id="ob-note" class="pf-status">takes ~1 minute for 10 videos</span>
+        <span id="ob-note" class="pf-status">Caption availability and processing time vary</span>
       </div>
     </div>
     <div id="ob-progress" class="ob-progress" hidden></div>
@@ -417,8 +424,8 @@
   <span>Hindsight · own-channel-first transcript intelligence · MIT</span>
 </footer>
 <script src="https://www.youtube.com/iframe_api"></script>
-<script src="app.js?v=24"></script>
-<script src="galaxy.js?v=8"></script>
+<script src="app.js?v=25"></script>
+<script src="galaxy.js?v=9"></script>
 <script src="cut.js?v=2"></script>
 <!-- The agent island mounts here. Loaded last so the studio's bridge functions
      (hsOpenLens / hsPlayMoment / hsContext) exist before any tool can fire. -->

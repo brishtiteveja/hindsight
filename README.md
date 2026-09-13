@@ -30,6 +30,8 @@ Every dot represents a video. Clusters group the archive into issue families.
 
 **Hover** to discover an issue and its video count. **Click** to open that cluster in the original interactive Galaxy, where you can zoom, filter, and inspect individual videos.
 
+The central search box accepts a topic, creator, or YouTube URL. Keywords filter the map; video links open the import flow, where you can build memory from available captions. In the Galaxy, selected clusters fit the viewport and a limited set of thumbnail markers makes individual videos recognizable.
+
 The landing map currently contains about **23,000 videos**. The wider installation contains roughly **49,000 videos across more than 100 channels**; different views cover different subsets.
 
 ## Follow one story
