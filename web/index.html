@@ -7,19 +7,20 @@
 <meta name="description" content="Every channel remembers what it said. Chat with a channel's history, watch its framing evolve, see the receipts."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="style.css?v=19"/>
+<link rel="stylesheet" href="style.css?v=21"/>
 <!-- In-studio agent. CopilotKit's stylesheet is scoped under [data-copilotkit]
      with cpk:-prefixed utilities, so it cannot reach the studio's own styles. -->
-<link rel="stylesheet" href="agent/hs-agent.css"/>
+<link rel="stylesheet" href="agent/hs-agent.css?v=2"/>
 </head>
 <body>
 <header id="topbar">
-  <div class="brand" onclick="go('map')">
+  <div class="brand" onclick="go('home')">
     <span class="brand-mark">◉</span>
     <span class="brand-name">Hindsight</span>
     <span class="brand-by">by Perspectivity</span>
   </div>
   <nav class="top-nav">
+    <button data-nav="home" onclick="go('home')">Home</button>
     <button data-nav="map" class="on" onclick="go('map')">Studio</button>
     <button data-nav="galaxy" onclick="go('galaxy')">Galaxy</button>
     <button data-nav="cut" onclick="go('cut')">Narrative Cut</button>
@@ -38,6 +39,34 @@
 </header>
 
 <!-- ══ GALAXY ══ -->
+<main id="view-home" class="view gx-landing">
+  <div class="gx-wrap">
+    <canvas id="home-galaxy" aria-label="Interactive map of videos grouped by issue"></canvas>
+    <section class="gx-intro" id="gx-intro">
+      <div class="gx-kicker">THE YOUTUBE NARRATIVE MAP</div>
+      <h1>Every issue<br/>has a <em>history.</em></h1>
+      <p>See how creators frame the world.<br/>Follow what changes. Return to the evidence.</p>
+      <div class="gx-intro-actions"><button class="gx-primary" onclick="go('galaxy')">Explore the galaxy</button><button class="gx-secondary" onclick="document.getElementById('gx-story').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'})">Follow a story</button></div>
+      <div class="gx-provenance">Persistent archive memory<br/><span>Transcripts collected by Perspectivity.co</span></div>
+    </section>
+    <button id="gx-motion" class="gx-motion" onclick="gxToggleMotion()" aria-pressed="false">Pause motion</button>
+    <div id="home-galaxy-tip" class="home-galaxy-tip" hidden></div>
+    <div id="home-cluster-labels" class="home-cluster-labels"></div>
+
+    <div class="gx-top">
+      <div class="gx-title">Issue Galaxy <span>Each point is a video. Each cluster, an issue.</span></div>
+      <div id="home-galaxy-status" class="gx-status"></div>
+    </div>
+
+
+  </div>
+  <section id="gx-story" class="gx-story">
+    <div class="gx-story-head"><div><div class="gx-kicker">ONE ISSUE · THREE MOMENTS</div><h2>AI regulation. A changing frame.</h2><p>Dwarkesh Patel’s channel · April–May 2026</p></div><button class="gx-primary" onclick="hsInvestigateStory()">Investigate this story</button></div>
+    <div id="gx-story-sources" class="gx-story-sources"></div>
+    <p class="gx-story-note">Different arguments within a broadly critical stance. These moments do not establish a personal reversal. Open a source to inspect the context.</p>
+  </section>
+</main>
+
 <main id="view-galaxy" class="view" hidden>
   <div class="gx-wrap">
     <canvas id="gx-canvas"></canvas>
@@ -56,6 +85,7 @@
       </div>
       <div id="gx-issues" class="gx-issues"></div>
       <button class="gx-reset" onclick="gxReset()">reset view</button>
+      <button class="gx-investigate" onclick="gxInvestigate()">Investigate this selection</button>
     </div>
 
     <div class="gx-mobilebar">
@@ -161,7 +191,7 @@
 </main>
 
 <!-- ══ MAP VIEW ══ -->
-<main id="view-map" class="view">
+<main id="view-map" class="view" hidden>
   <section class="hero">
     <h1>Your channel <em>remembers</em><br/>everything you've said.</h1>
     <p>Now it works for you — from the next idea to the finished upload,
@@ -387,12 +417,12 @@
   <span>Hindsight · own-channel-first transcript intelligence · MIT</span>
 </footer>
 <script src="https://www.youtube.com/iframe_api"></script>
-<script src="app.js?v=22"></script>
-<script src="galaxy.js?v=6"></script>
+<script src="app.js?v=24"></script>
+<script src="galaxy.js?v=8"></script>
 <script src="cut.js?v=2"></script>
 <!-- The agent island mounts here. Loaded last so the studio's bridge functions
      (hsOpenLens / hsPlayMoment / hsContext) exist before any tool can fire. -->
 <div id="hs-agent"></div>
-<script type="module" src="agent/hs-agent.js"></script>
+<script type="module" src="agent/hs-agent.js?v=2"></script>
 </body>
 </html>

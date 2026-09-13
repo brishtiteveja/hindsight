@@ -13,15 +13,18 @@ const PALETTE = ["#f0b243","#7fd6a4","#c9a7f5","#ff7b66","#8fb7de",
 let BROWSE = null;   // cached /v1/browse payload
 
 function go(view, slug) {
-  for (const v of ["map", "channel", "collection", "galaxy", "cut", "ledger", "targets", "liars", "onboard"])
+  for (const v of ["home", "map", "channel", "collection", "galaxy", "cut", "ledger", "targets", "liars", "onboard"])
     $("view-" + v).hidden = view !== v;
   document.querySelectorAll(".top-nav [data-nav]").forEach((b) =>
     b.classList.toggle("on", b.dataset.nav === view));
   document.getElementById("nav-drop")?.classList.remove("open");
   window.scrollTo(0, 0);
+  window.hsInvestigation = null;
+  if (view !== "channel") { CH = null; window.hsContext && hsBroadcast(); }
   if (view === "map") { loadMap(); loadPipeline(); }
   if (view === "channel") loadChannel(slug);
-  if (view === "galaxy") loadGalaxy();
+  if (view === "home") loadHomeGalaxy();
+  if (view === "galaxy") return loadGalaxy();
   if (view === "cut") { fillCutPicker(); if (!CUT) { renderCutPresets(); loadCut(0); } }
   if (view === "ledger") loadLedger();
   if (view === "targets") loadTargets();
@@ -649,7 +652,10 @@ async function makeIdeas() {
 
 const postJSON = (url, body) =>
   fetch(url, { method: "POST", headers: { "Content-Type": "application/json" },
-               body: JSON.stringify(body) }).then((r) => r.json());
+               body: JSON.stringify(body) }).then(async (r) => {
+    if (!r.ok) throw new Error(`Request failed (${r.status})`);
+    return r.json();
+  });
 
 /* ── Pre-flight ── */
 const VERDICT_LABEL = {
@@ -663,7 +669,12 @@ const VERDICT_LABEL = {
 
 async function runPrecheck() {
   const script = $("pf-script").value.trim();
-  if (script.length < 60) { $("pf-status").textContent = "paste a longer draft"; return; }
+  const channel = CH;
+  if (!channel || script.length < 60) {
+    const reason = !channel ? "select a channel first" : "paste a longer draft";
+    $("pf-status").textContent = reason;
+    return { ok: false, reason };
+  }
   $("pf-status").textContent = "";
   const pg = progressInto($("pf-results"), [
     "extracting the claims your draft makes…",
@@ -672,8 +683,21 @@ async function runPrecheck() {
     "collecting the receipts and timestamps…",
   ], 3);
   let d;
-  try { d = await postJSON(`v1/channels/${CH}/precheck`, { script }); pg.done(); }
-  catch { pg.done(); $("pf-results").innerHTML = ""; $("pf-status").textContent = "check failed"; return; }
+  try {
+    d = await postJSON(`v1/channels/${channel}/precheck`, { script });
+    if (d.error || !Array.isArray(d.claims)) throw new Error(d.error || "Invalid check response");
+  } catch (e) {
+    pg.done();
+    $("pf-results").innerHTML = "";
+    $("pf-status").textContent = "Check failed. Your draft is still here; try again.";
+    return { ok: false, reason: e.message || "check failed" };
+  }
+  pg.done();
+  if (CH !== channel || $("pf-script").value.trim() !== script) {
+    $("pf-results").innerHTML = "";
+    $("pf-status").textContent = "The draft or channel changed. Check the current draft again.";
+    return { ok: false, reason: "draft or channel changed during check" };
+  }
 
   const s = d.summary || {};
   $("pf-status").innerHTML = Object.keys(s).length
@@ -698,6 +722,7 @@ async function runPrecheck() {
           </div>`).join("")}
       </div>
     </div>`).join("");
+  return { ok: true, result: d, channel, draft_chars: script.length };
 }
 
 /* ── Clip finder ── */
@@ -965,9 +990,8 @@ function observePipeFlow() {
   io.observe(pipe);
 }
 
-/* boot */
-loadMap();
-loadPipeline();
+/* Boot after all three studio scripts have initialized. */
+window.addEventListener("DOMContentLoaded", () => { go("home"); hsRenderStory(); });
 
 /* ── What happened: the ledger ── */
 let LEDGER = null;
@@ -1273,6 +1297,8 @@ window.hsContext = () => {
   const draft = hsDraft();
   return {
     channel: CH,
+    investigation: window.hsInvestigation || null,
+    galaxy: !$("view-galaxy").hidden ? window.hsGalaxySelection || null : null,
     lens: HS_LENS,
     // The draft itself, not just a flag: "check this" has to work without the
     // user pasting their script a second time into the chat.
@@ -1296,14 +1322,13 @@ window.hsRunPreflight = async () => {
   const draft = hsDraft();
   if (draft.length < 60) return { ok: false, reason: "no draft in the editor yet" };
   window.hsOpenLens("preflight");
-  await runPrecheck();
-  const counts = {};
-  document.querySelectorAll("#pf-results [data-verdict]").forEach((el) => {
-    const v = el.dataset.verdict;
-    counts[v] = (counts[v] || 0) + 1;
-  });
-  return { ok: true, rendered_in: "preflight lens", draft_chars: draft.length,
-           verdicts: counts };
+  const checked = await runPrecheck();
+  if (!checked.ok) return checked;
+  // Return the evidence already rendered. Counts alone force the model to run
+  // the expensive check a second time just to recover video ids and timestamps.
+  return { ok: true, rendered_in: "preflight lens", channel: checked.channel,
+           draft_chars: checked.draft_chars, verdicts: checked.result.summary || {},
+           claims: checked.result.claims };
 };
 
 /* Honest about what actually happened: a dispatched call is not a playing
@@ -1340,3 +1365,17 @@ document.addEventListener("input", (e) => {
   clearTimeout(window._hsDraftT);
   window._hsDraftT = setTimeout(hsBroadcast, 400);   // debounce typing
 });
+
+const HS_FEATURED_STORY = {"topic": "AI regulation", "channel": "dwarkesh-patel", "provenance": "Existing transcripts collected by Perspectivity.co. Dates are archive metadata. Framing summaries are editorial interpretations, not verbatim quotations.", "interpretation": "These examples share a critical stance while emphasizing different concerns. They do not establish a reversal by a particular person.", "sources": [{"video_id": "unAEMjpvnkk", "title": "Are we racing China just to become China?", "archive_date": "2026-04-26", "channel": "dwarkesh-patel", "framing_label": "Government coercion", "framing_summary": "The video frames AI governance as a question of government leverage over a private company.", "second": 15, "transcript_excerpt": "the government did. The government has threatened to destroy Anthropic as a private business because Anthropic refuses to sell to the government on terms that the government commands. The", "url": "https://www.youtube.com/watch?v=unAEMjpvnkk&t=15s", "thumbnail": "https://i.ytimg.com/vi/unAEMjpvnkk/mqdefault.jpg"}, {"video_id": "5Wvpc_2-7-U", "title": "AI Regulation's Authoritarian Problem", "archive_date": "2026-04-28", "channel": "dwarkesh-patel", "framing_label": "Vague definitions", "framing_summary": "The argument focuses on how broad AI-risk terms could permit abuse.", "second": 13, "transcript_excerpt": "a wannabe despot. The underlying terms here like catastrophic risk or threats to national security or autonomy risk are so vague and so open to interpretation that you're just handing a fully loaded bazooka to a future power-hungry leader. These terms can mean whatever the government wants them", "url": "https://www.youtube.com/watch?v=5Wvpc_2-7-U&t=13s", "thumbnail": "https://i.ytimg.com/vi/5Wvpc_2-7-U/mqdefault.jpg"}, {"video_id": "yiaKkyx8g3s", "title": "Why the Nukes Analogy for AI Is Wrong", "archive_date": "2026-05-01", "channel": "dwarkesh-patel", "framing_label": "A different analogy", "framing_summary": "The speaker challenges the nuclear-weapons analogy and compares AI to industrialization.", "second": 31, "transcript_excerpt": "used. But I think this is a terrible analogy. First, AI is not some self-contained weapon like a nuclear bomb, which only does one thing. Rather, it is more like the process of industrialization itself. Now, people", "url": "https://www.youtube.com/watch?v=yiaKkyx8g3s&t=31s", "thumbnail": "https://i.ytimg.com/vi/yiaKkyx8g3s/mqdefault.jpg"}]};
+
+function hsRenderStory() {
+  const box = $("gx-story-sources");
+  if (!box) return;
+  box.innerHTML = HS_FEATURED_STORY.sources.map((v, i) => `<button class="gx-story-source" data-source="${i}"><div class="gx-source-image"><img src="${v.thumbnail}" alt="${esc(v.title)}" loading="lazy"/><span>${fmtT(v.second)}</span></div><div class="gx-source-date">${v.archive_date}</div><h3>${esc(v.framing_label)}</h3><p>${esc(v.framing_summary)}</p><span class="gx-source-title">${esc(v.title)}</span><span class="gx-source-action">Open source moment</span></button>`).join("");
+  box.querySelectorAll("button").forEach(b => b.onclick = () => {const v = HS_FEATURED_STORY.sources[+b.dataset.source]; play(v.video_id, v.second, v.title);});
+}
+function hsInvestigateStory() {
+  window.hsInvestigation = HS_FEATURED_STORY;
+  hsBroadcast();
+  window.dispatchEvent(new CustomEvent("hs:open-agent"));
+}

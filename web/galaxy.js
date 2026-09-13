@@ -299,6 +299,13 @@ function applyGxFilter() {
   $("gx-status").textContent = filtering
     ? `${n.toLocaleString()} of ${G.n.toLocaleString()} videos match`
     : `${G.n.toLocaleString()} videos · ${G.labels.length} issue families · ${G.channels.length} channels`;
+  const matched = [];
+  for (let i = 0; i < G.n; i++) if (gMatch[i]) matched.push(i);
+  matched.sort((a,b) => G.d[a].localeCompare(G.d[b]));
+  const chosen = matched.length <= 8 ? matched : Array.from({length:8}, (_,i) => matched[Math.round(i*(matched.length-1)/7)]);
+  window.hsGalaxySelection = {issue: gFilter.issue < 0 ? null : G.labels.find(l=>l.key===G.issues[gFilter.issue])?.label,
+    query: gFilter.q, matching_videos: n, sources: chosen.map(i=>({video_id:G.v[i], channel:G.channels[G.c[i]], title:G.t[i], date:G.d[i]})), sampling:"Up to eight matching videos sampled across archive dates; not an exhaustive comparison."};
+  window.hsContext && hsBroadcast();
   queueDraw();
 }
 
@@ -392,3 +399,91 @@ function gxZoomBtn(f) {
     tLast = null; pinch = null;
   });
 })();
+
+function gxInvestigate() {
+  if (!G) return;
+  applyGxFilter();
+  window.hsInvestigation = null;
+  hsBroadcast();
+  window.dispatchEvent(new CustomEvent("hs:open-agent"));
+}
+function gxToggleMotion() {
+  const paused = $("view-home").classList.toggle("gx-motion-paused");
+  $("gx-motion").textContent = paused ? "Resume motion" : "Pause motion";
+  $("gx-motion").setAttribute("aria-pressed", String(paused));
+}
+
+let HOME_GALAXY = null;
+let homeLayout = null;
+async function loadHomeGalaxy() {
+  try {
+    if (!HOME_GALAXY) HOME_GALAXY = await api("v1/galaxy");
+    const d = HOME_GALAXY;
+    $("home-galaxy-status").textContent = `${d.n.toLocaleString()} mapped videos · ${d.labels.length} issue families · ${d.channels.length} channels`;
+    drawHomeGalaxy();
+    const cv = $("home-galaxy");
+    cv.onmousemove = homeGalaxyHover;
+    cv.onmouseleave = () => { $("home-galaxy-tip").hidden = true; };
+    cv.onclick = (e) => { const issue = homeGalaxyPick(e); if (issue) homeOpenCluster(issue.key); };
+  } catch { $("home-galaxy-status").textContent = "The map is unavailable. Explore the featured story below."; }
+}
+function drawHomeGalaxy() {
+  if (!HOME_GALAXY || $("view-home").hidden) return;
+  const d = HOME_GALAXY, cv = $("home-galaxy"), ctx = cv.getContext("2d");
+  const w = cv.clientWidth, h = cv.clientHeight, dpi = Math.min(devicePixelRatio || 1, 2);
+  cv.width = w*dpi; cv.height = h*dpi; ctx.setTransform(dpi,0,0,dpi,0,0);
+  const left = w > 800 ? Math.min(470,w*.37) : 0, available = w-left;
+  const k = Math.min(available*.95,h*.90)/d.world;
+  const x = left+(available-d.world*k)/2, y=(h-d.world*k)/2;
+  const hues = d.issues.map(key=>d.labels.find(l=>l.key===key)?.hue || "#aaa");
+  const paths = hues.map(()=>new Path2D());
+  const r = w > 800 ? .65 : .42;
+  for(let i=0;i<d.n;i++) paths[d.i[i]].rect(d.x[i]*k+x,d.y[i]*k+y,r*1.5,r*1.5);
+  paths.forEach((path,i)=>{ctx.fillStyle=hues[i];ctx.globalAlpha=.8;ctx.fill(path);});
+  homeLayout = {x,y,k};
+  const labels = $("home-cluster-labels");
+  labels.innerHTML = "";
+  for (const l of d.labels.filter(l=>l.n>700)) {
+    const b = document.createElement("button");
+    b.textContent = l.label; b.style.left = `${l.x*k+x}px`; b.style.top = `${l.y*k+y}px`; b.style.color = l.hue;
+    b.setAttribute("aria-label", `Explore ${l.label}, ${l.n.toLocaleString()} videos`);
+    b.title = `${l.n.toLocaleString()} videos · Open this issue in the Galaxy`;
+    b.onclick = () => homeOpenCluster(l.key);
+    b.onmouseenter = (e) => homeGalaxyTooltip(l,e.clientX,e.clientY);
+    b.onmouseleave = () => {$("home-galaxy-tip").hidden=true;};
+    labels.appendChild(b);
+  }
+}
+window.addEventListener("resize",()=>{if(HOME_GALAXY) requestAnimationFrame(drawHomeGalaxy);});
+
+function homeGalaxyPick(e) {
+  if (!HOME_GALAXY || !homeLayout) return null;
+  const rect = $("home-galaxy").getBoundingClientRect(), d = HOME_GALAXY;
+  const px = e.clientX-rect.left, py = e.clientY-rect.top;
+  let nearest = -1, distance = 16*16;
+  for (let i=0;i<d.n;i++) {
+    const dx=d.x[i]*homeLayout.k+homeLayout.x-px, dy=d.y[i]*homeLayout.k+homeLayout.y-py;
+    const dd=dx*dx+dy*dy;
+    if(dd<distance){distance=dd;nearest=i;}
+  }
+  return nearest<0 ? null : d.labels.find(l=>l.key===d.issues[d.i[nearest]]);
+}
+function homeGalaxyTooltip(issue, clientX, clientY) {
+  const tip = $("home-galaxy-tip"), wrap=$("home-galaxy").parentElement.getBoundingClientRect();
+  tip.hidden=false;
+  tip.innerHTML=`<strong>${esc(issue.label)}</strong><span>${issue.n.toLocaleString()} videos in this issue family</span><p>Explore how channels cover this issue. Open the cluster to inspect individual videos and sources.</p><b>Open in Galaxy</b>`;
+  tip.style.left=`${Math.max(12,Math.min(clientX-wrap.left+16,wrap.width-272))}px`;
+  tip.style.top=`${Math.max(12,Math.min(clientY-wrap.top+16,wrap.height-165))}px`;
+}
+function homeGalaxyHover(e) {
+  const issue = homeGalaxyPick(e);
+  $("home-galaxy").style.cursor=issue ? "pointer" : "default";
+  if(issue) homeGalaxyTooltip(issue,e.clientX,e.clientY); else $("home-galaxy-tip").hidden=true;
+}
+async function homeOpenCluster(key) {
+  $("home-galaxy-tip").hidden=true;
+  await go("galaxy");
+  if(!G) return;
+  const idx=G.issues.indexOf(key);
+  if(idx>=0){gFilter.issue=-1;gxIssue(idx);}
+}

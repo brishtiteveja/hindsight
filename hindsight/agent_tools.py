@@ -13,6 +13,8 @@ attach a video id and a timestamp to is worth less than no answer, so the
 return shapes carry ids and seconds rather than prose.
 """
 
+import re
+
 from . import ideas as ideas_mod, precheck as precheck_mod, studio
 from .contradictions import find_contradictions, load_contradictions
 from .embeddings import search
@@ -45,6 +47,36 @@ def t_search_catalogue(channel: str, query: str, k: int = 8) -> dict:
                     "summary": d.get("summary", ""),
                     "url": _watch_url(vid)})
     return {"results": out}
+
+
+def t_read_sources(sources: list[dict]) -> dict:
+    """Read bounded source excerpts without re-embedding or inventing citations."""
+    results = []
+    for source in sources[:8]:
+        channel = str(source.get("channel", ""))
+        vid = str(source.get("video_id", ""))
+        if not channel or not re.fullmatch(r"[A-Za-z0-9_-]{1,100}", vid):
+            results.append({"video_id": vid, "error": "invalid source identifier"})
+            continue
+        store = ChannelStore(channel)
+        transcript = store.get_transcript(vid)
+        if not transcript:
+            results.append({"video_id": vid, "channel": channel, "error": "transcript not found"})
+            continue
+        digest = store.get_digest(vid) or {}
+        second = max(0, float(source.get("second") or 0))
+        segments = transcript.get("segments") or []
+        excerpt = [x for x in segments if max(0, second-25) <= float(x.get("start", 0)) <= second+100][:100]
+        results.append({"video_id": vid, "channel": channel,
+            "title": transcript.get("title") or digest.get("title"),
+            "published_at": transcript.get("published_at") or digest.get("published_at"),
+            "summary": digest.get("summary", ""),
+            "claims": (digest.get("claims") or [])[:12],
+            "transcript_excerpt": [{"second": x.get("start", 0), "text": str(x.get("text", ""))[:700]} for x in excerpt],
+            "excerpt_is_partial": len(excerpt) < len(segments),
+            "attribution_note": "Channel ownership does not establish the speaker. Verify attribution before claiming a personal change of position.",
+            "url": _watch_url(vid, int(second))})
+    return {"sources": results, "scope": "Source excerpts and existing analysis; not independent fact verification."}
 
 
 def t_ask_channel(channel: str, question: str, k: int = 8) -> dict:
@@ -86,6 +118,7 @@ def t_draft_metadata(channel: str, video_id: str) -> dict:
 
 DISPATCH = {
     "list_channels": t_list_channels,
+    "read_sources": t_read_sources,
     "search_catalogue": t_search_catalogue,
     "ask_channel": t_ask_channel,
     "get_persona": t_get_persona,
@@ -108,6 +141,10 @@ def _tool(name: str, description: str, properties: dict,
 _CHANNEL = {"type": "string", "description": "Channel slug, e.g. dwarkesh-patel."}
 
 SCHEMAS = [
+    _tool("read_sources", "Read the actual transcript excerpts and analysis for source videos already visible in the user's investigation or galaxy selection. Use before comparing their framing. Preserve dates and speaker uncertainty.",
+          {"sources": {"type": "array", "maxItems": 8, "items": {"type": "object", "properties": {
+              "channel": _CHANNEL, "video_id": {"type": "string"}, "second": {"type": "number", "description": "Optional source moment to inspect; defaults to start."}},
+              "required": ["channel", "video_id"]}}}, ["sources"]),
     _tool("list_channels",
           "List every channel in the corpus. Use when unsure of a slug.",
           {}, []),
