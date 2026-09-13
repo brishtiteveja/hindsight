@@ -89,6 +89,44 @@ Bring your own channel: `uv run hindsight ingest ./captions --channel "My Channe
 then `analyze` and `index`. Or paste video links into **＋ Add your channel** in
 the studio and the whole pipeline runs in about a minute.
 
+## Reviewing this repo from a clean clone
+
+The 49K-video corpus is not in git — it's gigabytes of third-party captions, and
+`data/` is gitignored. So a fresh clone starts empty. It starts *cleanly* empty:
+nothing crashes, `/v1/channels` returns `[]`, and all 12 tools load.
+
+The built agent island is committed (`web/agent/`), so you do **not** need npm to
+run the app.
+
+```bash
+git clone https://github.com/brishtiteveja/hindsight && cd hindsight
+uv sync
+
+# Works with no API keys at all — parses captions into transcript documents:
+uv run hindsight ingest samples/demo-channel --channel "Demo Channel"
+uv run hindsight serve                       # studio on :8300
+```
+
+`samples/demo-channel/` is a short caption file written for this purpose (not
+anyone's real video) containing a deliberate self-reversal and a guest
+disclaimer, so the pre-flight and attribution behaviour can be exercised.
+
+What each key unlocks:
+
+| Without keys | `GEMINI_API_KEY` | `OPENROUTER_API_KEY` |
+|---|---|---|
+| ingest, browse transcripts, serve the studio, list tools | `analyze` / `index` — digests, embeddings, semantic search, persona | the agent itself: chat, pre-flight judging, ideas, clips, metadata |
+
+Both keys are needed for the full agent experience, because reasoning and
+retrieval deliberately run on different providers (see **The model stack**).
+
+To rebuild the island after changing `agent-ui/src/`:
+
+```bash
+cd agent-ui && npm install && npx vite build     # outputs to web/agent/
+node verify-island.mjs http://127.0.0.1:8300/    # asserts it mounted
+```
+
 ## The agent API
 
 | Endpoint | What it does |

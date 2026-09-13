@@ -1,0 +1,50 @@
+1
+00:00:00,000 --> 00:00:06,000
+Welcome back. Today I want to talk about whether compute scaling still
+matters for frontier capability.
+
+2
+00:00:06,000 --> 00:00:14,000
+My position in March was simple: the timelines people quote are wildly
+overhyped, and we are nowhere near a country of geniuses in a datacenter.
+
+3
+00:00:14,000 --> 00:00:22,000
+I said then that scaling training compute was hitting diminishing returns,
+and that efficiency gains would not close the gap on their own.
+
+4
+00:00:22,000 --> 00:00:31,000
+Since then I have changed my mind on one specific point, and I want to be
+explicit about it rather than quietly revise the record.
+
+5
+00:00:31,000 --> 00:00:40,000
+Inference-time compute turned out to matter far more than I expected. That
+is a real update, and it came from watching reasoning models improve.
+
+6
+00:00:40,000 --> 00:00:48,000
+What I still believe: regulation written around vague terms like
+catastrophic risk can be repurposed to suppress models that criticize
+government policy.
+
+7
+00:00:48,000 --> 00:00:57,000
+Those terms are not precise. National security language in particular has
+a long history of being stretched well past its original scope.
+
+8
+00:00:57,000 --> 00:01:05,000
+So if you hear me say later that such language is precise enough to prevent
+abuse, hold me to this clip.
+
+9
+00:01:05,000 --> 00:01:14,000
+Next week my guest argues the opposite of everything I just said about
+scaling. I am not going to pretend I agree with her.
+
+10
+00:01:14,000 --> 00:01:20,000
+That is the whole episode. If you want the longer argument, the March video
+is linked below.
