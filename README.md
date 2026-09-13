@@ -6,7 +6,7 @@
 
 **Explore how YouTube creators frame the world—and how the conversation changes.**
 
-[Explore the live app](https://dev.perspectivity.co/hindsight/) · [Try the agent](#follow-one-story) · [Run locally](#run-locally)
+[Explore the live app](https://dev.perspectivity.co/hindsight/) · [Try the agent](#follow-one-story) · [Run locally](#run-locally) · [Demo video](https://www.loom.com/share/f27093cb0ae74422b088fbefa632fe2a)
 
 Built by [Perspectivity.co](https://perspectivity.co) · Agent work for **AI Tinkerers × OpenAI: Agents, Everywhere**
 
