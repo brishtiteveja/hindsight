@@ -677,7 +677,7 @@ async function runPrecheck() {
     : "no checkable claims found";
 
   $("pf-results").innerHTML = (d.claims || []).map((c) => `
-    <div class="pf-claim ${c.verdict}">
+    <div class="pf-claim ${c.verdict}" data-verdict="${c.verdict}">
       <div class="pf-verdict ${c.verdict}">${VERDICT_LABEL[c.verdict] || c.verdict}</div>
       <div class="pf-body">
         <div class="pf-text">${esc(c.text)}</div>
@@ -1253,24 +1253,83 @@ function progressInto(el, stages, skeleton = 3) {
        on screen" stays current between turns. */
 let HS_LENS = "chat";
 
-function hsBroadcast() {
-  window.dispatchEvent(new CustomEvent("hs:context", {
-    detail: { channel: CH, lens: HS_LENS },
-  }));
+function hsDraft() {
+  const el = $("pf-script");
+  return el && el.value.trim() ? el.value.trim() : "";
 }
 
-window.hsContext = () => ({ channel: CH, lens: HS_LENS });
+function hsBroadcast() {
+  window.dispatchEvent(new CustomEvent("hs:context", { detail: window.hsContext() }));
+}
+
+window.hsContext = () => {
+  const draft = hsDraft();
+  return {
+    channel: CH,
+    lens: HS_LENS,
+    // The draft itself, not just a flag: "check this" has to work without the
+    // user pasting their script a second time into the chat.
+    draft_present: Boolean(draft),
+    draft_chars: draft.length,
+    draft: draft.slice(0, 6000),
+  };
+};
 
 window.hsOpenLens = (name) => {
   setLens(name);
   HS_LENS = name;
   hsBroadcast();
+  return `opened the ${name} lens`;
 };
 
-window.hsPlayMoment = (videoId, second, note) => play(videoId, second, note || "");
+/* Run the studio's own pre-flight on whatever is in the editor, so results land
+   in the real Pre-flight view instead of the agent narrating into an empty one.
+   Returns a summary the agent can reason about rather than a bare "done". */
+window.hsRunPreflight = async () => {
+  const draft = hsDraft();
+  if (draft.length < 60) return { ok: false, reason: "no draft in the editor yet" };
+  window.hsOpenLens("preflight");
+  await runPrecheck();
+  const counts = {};
+  document.querySelectorAll("#pf-results [data-verdict]").forEach((el) => {
+    const v = el.dataset.verdict;
+    counts[v] = (counts[v] || 0) + 1;
+  });
+  return { ok: true, rendered_in: "preflight lens", draft_chars: draft.length,
+           verdicts: counts };
+};
 
-// Keep the broadcast honest when the user navigates by hand.
+/* Honest about what actually happened: a dispatched call is not a playing
+   video. If the iframe never mounts (blocked embed, offline), say so and hand
+   back the watch URL so the evidence is still reachable. */
+window.hsPlayMoment = async (videoId, second, note) => {
+  try {
+    await play(videoId, second, note || "");
+  } catch (e) {
+    return { ok: false, reason: String(e && e.message || e),
+             url: `https://www.youtube.com/watch?v=${videoId}&t=${second}s` };
+  }
+  await new Promise((r) => setTimeout(r, 700));   // give the iframe a beat
+  const mounted = Boolean(document.querySelector("#player-mount iframe"));
+  const open = $("player") && !$("player").hidden;
+  return {
+    ok: open,
+    player_open: open,
+    embed_mounted: mounted,
+    // Distinguish "I opened it" from "it is playing" — the transcript panel is
+    // still usable evidence when an embed is blocked.
+    note: mounted ? "embed mounted" : "embed did not mount; transcript still shown",
+    url: `https://www.youtube.com/watch?v=${videoId}&t=${second}s`,
+  };
+};
+
+// Keep the broadcast honest when the user navigates or edits by hand.
 document.addEventListener("click", (e) => {
   const b = e.target.closest("#lens-nav button");
   if (b) { HS_LENS = b.dataset.lens; hsBroadcast(); }
+});
+document.addEventListener("input", (e) => {
+  if (e.target.id !== "pf-script") return;
+  clearTimeout(window._hsDraftT);
+  window._hsDraftT = setTimeout(hsBroadcast, 400);   // debounce typing
 });

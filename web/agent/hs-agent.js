@@ -31493,17 +31493,31 @@ function mT() {
 		let e = (e) => t(e.detail || {});
 		return window.addEventListener("hs:context", e), t(window.hsContext?.() ?? {}), () => window.removeEventListener("hs:context", e);
 	}, []), rC({
-		description: "The Hindsight studio view the user is currently looking at: which channel is open and which lens is active.",
+		description: "The Hindsight studio view the user is currently looking at: the open channel, the active lens, and the draft script currently in the Pre-flight editor (if any). When the user says 'this draft' or 'check this', they mean the draft below — do not ask them to paste it again.",
 		value: {
 			channel: e.channel ?? null,
 			lens: e.lens ?? null,
-			available_lenses: pT
+			available_lenses: pT,
+			draft_present: e.draft_present ?? !1,
+			draft_chars: e.draft_chars ?? 0,
+			draft: e.draft ?? ""
 		}
 	}), $S({
 		name: "open_lens",
 		description: "Switch the studio to a lens so the user sees what you are talking about. Call this before explaining a result that has its own view.",
 		parameters: l({ lens: c(pT).describe("Which lens to open.") }),
-		handler: async ({ lens: e }) => (window.hsOpenLens?.(e), `opened the ${e} lens`)
+		handler: async ({ lens: e }) => window.hsOpenLens?.(e) ?? {
+			ok: !1,
+			reason: "studio bridge unavailable"
+		}
+	}), $S({
+		name: "run_preflight",
+		description: "Check the draft currently in the studio's Pre-flight editor against the channel's published past, rendering the verdicts into the Pre-flight view. Use this instead of check_draft whenever the draft is already in the editor. Returns the verdict counts actually rendered.",
+		parameters: l({}),
+		handler: async () => await window.hsRunPreflight?.() ?? {
+			ok: !1,
+			reason: "studio bridge unavailable"
+		}
 	}), $S({
 		name: "play_moment",
 		description: "Open a video in the studio player at an exact second, so the user can watch the receipt for a claim instead of trusting you.",
@@ -31512,7 +31526,10 @@ function mT() {
 			second: m().int().describe("Where to start playback."),
 			note: u().optional().describe("Why this moment matters.")
 		}),
-		handler: async ({ video_id: e, second: t, note: n }) => (window.hsPlayMoment?.(e, t, n || ""), `playing ${e} at ${t}s`)
+		handler: async ({ video_id: e, second: t, note: n }) => await window.hsPlayMoment?.(e, t, n || "") ?? {
+			ok: !1,
+			reason: "studio bridge unavailable"
+		}
 	}), null;
 }
 function hT() {

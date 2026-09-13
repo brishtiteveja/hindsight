@@ -20,7 +20,7 @@ from .persona import ask, build_persona
 from .store import ChannelStore, list_channels
 
 # Tools whose side effect belongs in the browser, not here.
-FRONTEND_TOOLS = {"open_lens", "play_moment"}
+FRONTEND_TOOLS = {"open_lens", "play_moment", "run_preflight"}
 
 
 def _watch_url(video_id: str, second: int = 0) -> str:
@@ -176,11 +176,19 @@ SCHEMAS = [
           ["lens"]),
     _tool("play_moment",
           "Open a video in the studio player at an exact second, so the user "
-          "can watch the receipt for a claim instead of trusting you.",
+          "can watch the receipt for a claim instead of trusting you. Returns "
+          "whether the embed actually mounted — report what happened, and fall "
+          "back to the watch URL if it did not.",
           {"video_id": {"type": "string"},
            "second": {"type": "integer", "description": "Where to start playback."},
            "note": {"type": "string", "description": "Why this moment matters."}},
           ["video_id", "second"]),
+    _tool("run_preflight",
+          "Check the draft already in the studio's Pre-flight editor against the "
+          "channel's published past, rendering verdicts into the Pre-flight view. "
+          "Prefer this over check_draft when the draft is already on screen — it "
+          "avoids making the user paste it twice.",
+          {}, []),
 ]
 
 

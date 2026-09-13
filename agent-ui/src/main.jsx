@@ -48,12 +48,17 @@ function Wiring() {
   // does not need the channel spelled out.
   useAgentContext({
     description:
-      "The Hindsight studio view the user is currently looking at: which " +
-      "channel is open and which lens is active.",
+      "The Hindsight studio view the user is currently looking at: the open " +
+      "channel, the active lens, and the draft script currently in the " +
+      "Pre-flight editor (if any). When the user says 'this draft' or 'check " +
+      "this', they mean the draft below — do not ask them to paste it again.",
     value: {
       channel: view.channel ?? null,
       lens: view.lens ?? null,
       available_lenses: LENSES,
+      draft_present: view.draft_present ?? false,
+      draft_chars: view.draft_chars ?? 0,
+      draft: view.draft ?? "",
     },
   });
 
@@ -66,8 +71,24 @@ function Wiring() {
       lens: z.enum(LENSES).describe("Which lens to open."),
     }),
     handler: async ({ lens }) => {
-      window.hsOpenLens?.(lens);
-      return `opened the ${lens} lens`;
+      return window.hsOpenLens?.(lens) ?? { ok: false, reason: "studio bridge unavailable" };
+    },
+  });
+
+  // Runs the studio's own pre-flight over the draft already in the editor, so
+  // the verdicts render in the real Pre-flight view rather than the agent
+  // switching to an empty lens and describing what it would have found.
+  useFrontendTool({
+    name: "run_preflight",
+    description:
+      "Check the draft currently in the studio's Pre-flight editor against the " +
+      "channel's published past, rendering the verdicts into the Pre-flight " +
+      "view. Use this instead of check_draft whenever the draft is already in " +
+      "the editor. Returns the verdict counts actually rendered.",
+    parameters: z.object({}),
+    handler: async () => {
+      const r = await window.hsRunPreflight?.();
+      return r ?? { ok: false, reason: "studio bridge unavailable" };
     },
   });
 
@@ -81,9 +102,12 @@ function Wiring() {
       second: z.number().int().describe("Where to start playback."),
       note: z.string().optional().describe("Why this moment matters."),
     }),
+    // Returns what actually happened, not what was requested: a dispatched call
+    // is not a playing video, and claiming otherwise would make the agent
+    // unreliable about its own evidence.
     handler: async ({ video_id, second, note }) => {
-      window.hsPlayMoment?.(video_id, second, note || "");
-      return `playing ${video_id} at ${second}s`;
+      const r = await window.hsPlayMoment?.(video_id, second, note || "");
+      return r ?? { ok: false, reason: "studio bridge unavailable" };
     },
   });
 
