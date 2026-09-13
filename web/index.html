@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Hindsight — the YouTube narrative map</title>
+<meta name="description" content="Every channel remembers what it said. Chat with a channel's history, watch its framing evolve, see the receipts."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css?v=19"/>
+</head>
+<body>
+<header id="topbar">
+  <div class="brand" onclick="go('map')">
+    <span class="brand-mark">◉</span>
+    <span class="brand-name">Hindsight</span>
+    <span class="brand-by">by Perspectivity</span>
+  </div>
+  <nav class="top-nav">
+    <button data-nav="map" class="on" onclick="go('map')">Studio</button>
+    <button data-nav="galaxy" onclick="go('galaxy')">Galaxy</button>
+    <button data-nav="cut" onclick="go('cut')">Narrative Cut</button>
+    <button data-nav="ledger" onclick="go('ledger')">What happened</button>
+    <div class="nav-drop" id="nav-drop">
+      <button class="nav-drop-btn" onclick="document.getElementById('nav-drop').classList.toggle('open')">
+        Accountability <span class="nav-caret">▾</span></button>
+      <div class="nav-drop-menu">
+        <button data-nav="targets" onclick="go('targets')">◎ Who's the target?</button>
+        <button data-nav="liars" onclick="go('liars')">⚡ Who's lying?</button>
+      </div>
+    </div>
+    <button class="nav-add" onclick="go('onboard')">＋ Add your channel</button>
+  </nav>
+  <div class="tagline">the YouTube narrative map</div>
+</header>
+
+<!-- ══ GALAXY ══ -->
+<main id="view-galaxy" class="view" hidden>
+  <div class="gx-wrap">
+    <canvas id="gx-canvas"></canvas>
+    <div id="gx-tip" class="gx-tip" hidden></div>
+
+    <div class="gx-top">
+      <div class="gx-title">Issue Galaxy</div>
+      <div id="gx-status" class="gx-status"></div>
+    </div>
+
+    <div class="gx-side">
+      <div id="gx-leans" class="gx-leans">
+        <button onclick="gxLean(0)">Left</button>
+        <button onclick="gxLean(1)">Center</button>
+        <button onclick="gxLean(2)">Right</button>
+      </div>
+      <div id="gx-issues" class="gx-issues"></div>
+      <button class="gx-reset" onclick="gxReset()">reset view</button>
+    </div>
+
+    <div class="gx-mobilebar">
+      <button onclick="gxZoomBtn(1.5)" title="zoom in">＋</button>
+      <button onclick="gxZoomBtn(1/1.5)" title="zoom out">−</button>
+      <button onclick="document.querySelector('.gx-wrap').classList.toggle('panel-open')" title="filters">☰</button>
+      <button onclick="gxReset()" title="reset">⤾</button>
+    </div>
+    <div class="gx-bottom">
+      <input id="gx-search" placeholder="Search videos, channels…"
+             oninput="gxSearch(this.value)"/>
+    </div>
+  </div>
+</main>
+
+<!-- ══ NARRATIVE CUT ══ -->
+<main id="view-cut" class="view" hidden>
+  <div class="cut-head">
+    <div class="cut-title-row">
+      <h1>Narrative Cut</h1>
+      <span class="lens-sub">the edit bay — every channel a track, every clip a position taken</span>
+    </div>
+    <div id="cut-presets" class="cut-presets"></div>
+    <div class="cut-toolbar">
+      <span id="cut-now" class="cut-now">—</span>
+      <span class="cut-addtrack">
+        <select id="cut-channel-pick"><option value="">+ add track…</option></select>
+      </span>
+      <span class="cut-mode">
+        <button data-cutmode="compact" class="on" onclick="setCutMode('compact')" title="gaps removed">compact</button>
+        <button data-cutmode="calendar" onclick="setCutMode('calendar')" title="true calendar time">calendar</button>
+      </span>
+      <span class="cut-tools">
+        <button onclick="cutZoom(1/1.4)" title="zoom out">−</button>
+        <button onclick="cutFit()" title="fit">fit</button>
+        <button onclick="cutZoom(1.4)" title="zoom in">+</button>
+      </span>
+    </div>
+  </div>
+  <div id="cut-stage" class="cut-stage">
+    <div class="map-loading">pick a cut…</div>
+  </div>
+  <div id="cut-tip" class="cut-tip" hidden></div>
+</main>
+
+<!-- ══ WHAT HAPPENED (the ledger) ══ -->
+<main id="view-ledger" class="view" hidden>
+  <div class="lg-head">
+    <h1>What happened</h1>
+    <span class="lens-sub">scroll through time — who the map talked about each day, and which way the wind blew</span>
+    <span class="lg-key">
+      <i class="lg-swatch crit"></i>criticized
+      <i class="lg-swatch neu"></i>neutral
+      <i class="lg-swatch sup"></i>championed
+    </span>
+  </div>
+  <div id="ledger-feed" class="ledger-feed">
+    <div class="map-loading">opening the diary…</div>
+  </div>
+</main>
+
+<!-- ══ WHO'S THE TARGET ══ -->
+<main id="view-targets" class="view" hidden>
+  <div class="lg-head">
+    <h1>Who's the target?</h1>
+    <span class="lens-sub">who the map is criticizing — ranked, with the pile-on over time and who's throwing the punches</span>
+  </div>
+  <div id="targets-list" class="targets-list">
+    <div class="map-loading">counting the punches…</div>
+  </div>
+</main>
+
+<!-- ══ WHO'S LYING ══ -->
+<main id="view-liars" class="view" hidden>
+  <div class="lg-head">
+    <h1>Who's lying?</h1>
+    <span class="lens-sub">reversals and contradictions — every claim tied to the video where it was said</span>
+  </div>
+  <div class="liars-note">Reversal ratings are attributed to PolitiFact and deep-linked; video receipts come from the map's own catalogue. We present — the record decides.</div>
+  <div id="liars-list" class="liars-list">
+    <div class="map-loading">pulling the record…</div>
+  </div>
+</main>
+
+<!-- ══ ONBOARD: add your channel ══ -->
+<main id="view-onboard" class="view" hidden>
+  <div class="ob-wrap">
+    <h1>Drop <em>any</em> videos</h1>
+    <p class="ob-sub">Paste YouTube links — we fetch the captions on demand, analyze them, and
+       the whole studio unlocks. No setup: we detect the channel from the video itself, and
+       new drops append to a channel you've already built. Own-channel-first: use it on
+       content you have the rights to.</p>
+    <div class="ob-form">
+      <input id="ob-name" placeholder="Channel name (optional — we detect it from the video)" autocomplete="off"/>
+      <textarea id="ob-urls" placeholder="One YouTube link (or video ID) per line — up to 12 videos&#10;https://www.youtube.com/watch?v=…&#10;https://youtu.be/…"></textarea>
+      <div class="ob-actions">
+        <button class="pf-run" id="ob-go" onclick="startOnboard()">Build my channel memory</button>
+        <span id="ob-note" class="pf-status">takes ~1 minute for 10 videos</span>
+      </div>
+    </div>
+    <div id="ob-progress" class="ob-progress" hidden></div>
+  </div>
+</main>
+
+<!-- ══ MAP VIEW ══ -->
+<main id="view-map" class="view">
+  <section class="hero">
+    <h1>Your channel <em>remembers</em><br/>everything you've said.</h1>
+    <p>Now it works for you — from the next idea to the finished upload,
+       every step grounded in your own catalogue and 108 channels around it.</p>
+  </section>
+
+  <!-- the pipeline: two layouts, toggle top-right -->
+  <section id="pipeline" class="pipeline conveyor">
+    <div class="pipe-head">
+      <span class="pipe-title">The content pipeline, automated</span>
+      <span class="pipe-demo">live from <b>Dwarkesh Patel</b> · 105 videos</span>
+      <span class="pipe-toggle">
+        <button id="pipe-replay" class="pipe-replay" onclick="runPipeFlow(true)" title="watch the flow">▶ watch the flow</button>
+        <button id="pt-conveyor" class="on" onclick="setPipeLayout('conveyor')" title="conveyor">⇢</button>
+        <button id="pt-steps" onclick="setPipeLayout('steps')" title="steps">⤴</button>
+      </span>
+    </div>
+    <div id="pipe-stations" class="pipe-stations">
+      <div class="map-loading">warming the line…</div>
+    </div>
+    <div id="pipe-narrate" class="pipe-narrate"><span></span></div>
+  </section>
+
+  <!-- the engine: three ways into the memory -->
+  <section class="engine">
+    <div class="engine-kicker-row">
+      <span class="engine-kicker">powered by the memory — 49,411 videos · 108 channels</span>
+    </div>
+    <div class="explore-row">
+      <div class="explore-card" onclick="go('galaxy')">
+        <div class="xc-art xc-galaxy">
+          <i style="--x:22%;--y:38%;--s:52px;--c:#f0b243"></i><i style="--x:58%;--y:26%;--s:38px;--c:#7fd6a4"></i>
+          <i style="--x:74%;--y:60%;--s:44px;--c:#8fb7de"></i><i style="--x:38%;--y:68%;--s:32px;--c:#ff7b66"></i>
+          <i style="--x:52%;--y:48%;--s:60px;--c:#c9a7f5"></i>
+        </div>
+        <div class="xc-body"><h3>Issue Galaxy</h3>
+          <p>22,904 videos as one continent of issues — fly through it</p></div>
+      </div>
+      <div class="explore-card" onclick="go('cut')">
+        <div class="xc-art xc-cut">
+          <b style="--w:34%;--l:4%;--t:22%;background:#8c4438"></b><b style="--w:18%;--l:44%;--t:22%;background:#3f7a5b"></b>
+          <b style="--w:26%;--l:68%;--t:22%;background:#8c4438"></b>
+          <b style="--w:22%;--l:10%;--t:56%;background:#3f7a5b"></b><b style="--w:30%;--l:38%;--t:56%;background:#6b5590"></b>
+          <b style="--w:16%;--l:74%;--t:56%;background:#8c4438"></b>
+          <span class="xc-play"></span>
+        </div>
+        <div class="xc-body"><h3>Narrative Cut</h3>
+          <p>the edit bay — channels as tracks, contradictions as ⚡ arcs</p></div>
+      </div>
+      <div class="explore-card" onclick="go('ledger')">
+        <div class="xc-art xc-ledger">
+          <u><s>06</s><b style="background:#3d1a14;color:#ff9d7a">Trump 129</b><b style="background:#24211b;color:#b8ad97">Iran 38</b></u>
+          <u><s>05</s><b style="background:#14342a;color:#7fd6a4">El-Sayed 24</b><b style="background:#3d1a14;color:#ff9d7a">DOJ 19</b></u>
+          <u><s>04</s><b style="background:#24211b;color:#b8ad97">Rogers 16</b><b style="background:#3d1a14;color:#ff9d7a">Cornyn 22</b></u>
+        </div>
+        <div class="xc-body"><h3>What happened</h3>
+          <p>the map as a diary — who was talked about, day by day</p></div>
+      </div>
+    </div>
+  </section>
+
+  <div id="shelves" class="shelves">
+    <div class="map-loading">charting the map…</div>
+  </div>
+</main>
+
+<!-- ══ COLLECTION VIEW (one issue / facet / lean) ══ -->
+<main id="view-collection" class="view" hidden>
+  <div class="coll-hero" id="coll-hero">
+    <button class="back" onclick="go('map')">← map</button>
+    <h1 id="coll-title"></h1>
+    <p id="coll-sub"></p>
+    <div id="coll-issues" class="coll-issues"></div>
+    <div id="coll-tabs" class="coll-tabs">
+      <button data-ctab="channels" class="on" onclick="setCollTab('channels')">Channels</button>
+      <button data-ctab="timeline" onclick="setCollTab('timeline')">Evidence timeline</button>
+    </div>
+  </div>
+  <section id="coll-grid" class="channel-map"></section>
+  <section id="coll-timeline" class="timeline-wrap" hidden>
+    <div id="tl-summary" class="tl-summary"></div>
+    <div id="tl-track" class="tl-track"></div>
+  </section>
+</main>
+
+<!-- ══ CHANNEL VIEW ══ -->
+<main id="view-channel" class="view" hidden>
+  <div class="channel-layout">
+
+    <aside class="persona-pane">
+      <button class="back" onclick="go('map')">← map</button>
+      <div id="persona-card" class="persona-card"></div>
+      <nav class="lens-nav" id="lens-nav">
+        <button data-lens="ideas">💡 Ideas</button>
+        <button data-lens="preflight">✓ Pre-flight</button>
+        <button data-lens="clips">✂ Clips</button>
+        <button data-lens="studio">📦 Studio</button>
+        <button data-lens="chat"      class="on">💬 Ask</button>
+        <button data-lens="evolution">〽 Evolution</button>
+        <button data-lens="coverage" >🗺 Coverage</button>
+        <button data-lens="prism"    >◫ Prism</button>
+        <button data-lens="river"    >≋ River</button>
+        <button data-lens="receipts" >⚖ Receipts</button>
+      </nav>
+    </aside>
+
+    <section class="lens-pane">
+      <div id="lens-ideas" class="lens" hidden>
+        <div class="lens-head"><h2>What to make next</h2>
+          <span class="lens-sub">your coverage gaps, weighed against what the whole map is surging on</span>
+          <button class="mini-btn" onclick="makeIdeas()">regenerate</button></div>
+        <div id="ideas-list" class="ideas-list"></div>
+      </div>
+
+      <div id="lens-preflight" class="lens" hidden>
+        <div class="lens-head"><h2>Pre-flight</h2>
+          <span class="lens-sub">paste a draft — we check it against everything you've already said</span></div>
+        <textarea id="pf-script" class="pf-script"
+          placeholder="Paste your script or outline here…"></textarea>
+        <div class="pf-actions">
+          <button class="pf-run" onclick="runPrecheck()">Check draft</button>
+          <span id="pf-status" class="pf-status"></span>
+        </div>
+        <div id="pf-results" class="pf-results"></div>
+      </div>
+
+      <div id="lens-clips" class="lens" hidden>
+        <div class="lens-head"><h2>Clip finder</h2>
+          <span class="lens-sub">search your catalogue for the 45 seconds that should be a Short</span></div>
+        <form class="clip-form" onsubmit="return findClips(event)">
+          <input id="clip-q" placeholder="my hottest takes on…" autocomplete="off"/>
+          <button>Find</button>
+        </form>
+        <div id="clip-suggest" class="hint-chips"></div>
+        <div id="clip-results" class="clip-results"></div>
+      </div>
+
+      <div id="lens-studio" class="lens" hidden>
+        <div class="lens-head"><h2>Metadata studio</h2>
+          <span class="lens-sub">titles, description, chapters and tags drafted from what you actually said</span></div>
+        <select id="studio-video" onchange="loadMeta()"></select>
+        <div id="studio-pack" class="studio-pack"></div>
+      </div>
+
+      <div id="lens-chat" class="lens">
+        <div id="chat-log" class="chat-log">
+          <div class="chat-hint">
+            <div class="hint-title">Ask this channel anything about itself.</div>
+            <div id="chat-suggestions" class="hint-chips"></div>
+          </div>
+        </div>
+        <form id="chat-form" class="chat-form" onsubmit="return sendChat(event)">
+          <input id="chat-input" autocomplete="off"
+                 placeholder="What has this channel said about…"/>
+          <button>Ask</button>
+        </form>
+      </div>
+
+      <div id="lens-evolution" class="lens" hidden>
+        <div class="lens-head">
+          <h2>Voice evolution</h2>
+          <select id="evo-topic" onchange="renderEvolution()"></select>
+        </div>
+        <div id="evo-chart" class="chart-box"></div>
+        <div id="evo-shifts" class="shift-list"></div>
+      </div>
+
+      <div id="lens-coverage" class="lens" hidden>
+        <div class="lens-head"><h2>Coverage map</h2>
+          <span class="lens-sub">what this channel talks about — and where it's heating up</span></div>
+        <div id="coverage-grid" class="coverage-grid"></div>
+      </div>
+
+      <div id="lens-prism" class="lens" hidden>
+        <div class="lens-head">
+          <h2>Framing prism</h2>
+          <select id="prism-topic" onchange="renderPrism()"></select>
+        </div>
+        <div id="prism-cols" class="prism-cols"></div>
+      </div>
+
+      <div id="lens-river" class="lens" hidden>
+        <div class="lens-head"><h2>Narrative river</h2>
+          <span class="lens-sub">monthly volume of the channel's top topics</span></div>
+        <div id="river-chart" class="chart-box tall"></div>
+        <div id="river-legend" class="river-legend"></div>
+      </div>
+
+      <div id="lens-receipts" class="lens" hidden>
+        <div class="lens-head"><h2>The receipts</h2>
+          <span class="lens-sub">moments where the channel's claims pull in opposite directions</span></div>
+        <div id="receipts-list" class="receipts-list"></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ══ INLINE PLAYER ══ -->
+<div id="player" class="player-backdrop" hidden onclick="if(event.target===this)closePlayer()">
+  <div class="player-box">
+    <div class="player-bar">
+      <span id="player-title" class="player-title"></span>
+      <a id="player-open" class="player-open" target="_blank" title="open on YouTube">↗</a>
+      <button class="player-close" onclick="closePlayer()" title="close (Esc)">✕</button>
+    </div>
+    <div class="player-body">
+      <div class="player-frame-wrap">
+        <div id="player-mount"></div>
+      </div>
+      <aside class="player-transcript">
+        <div class="pt-head">
+          <span>Transcript</span>
+          <input id="pt-search" placeholder="search…" oninput="filterTranscript()"/>
+          <button id="pt-follow" class="on" onclick="toggleFollow()" title="follow along">⇅</button>
+        </div>
+        <div id="pt-lines" class="pt-lines"></div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>Hindsight · own-channel-first transcript intelligence · MIT</span>
+</footer>
+<script src="https://www.youtube.com/iframe_api"></script>
+<script src="app.js?v=21"></script>
+<script src="galaxy.js?v=6"></script>
+<script src="cut.js?v=2"></script>
+</body>
+</html>

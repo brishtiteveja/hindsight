@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — Hindsight</title>
+<style>
+  :root {
+    --ink: #0c0b09; --ink-2: #141210; --line: #2b2620;
+    --paper: #efe6d4; --paper-dim: #b8ad97; --faint: #7d745f; --amber: #f0b243;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 48px 20px 90px; background: var(--ink); color: var(--paper-dim);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+  }
+  main { max-width: 720px; margin: 0 auto; }
+  h1 { color: var(--paper); font-size: 30px; letter-spacing: -0.5px; margin: 0 0 6px; }
+  h2 { color: var(--paper); font-size: 18px; margin: 38px 0 10px; }
+  .up { color: var(--faint); font-size: 13px; margin: 0 0 34px; }
+  a { color: var(--amber); }
+  strong { color: var(--paper); }
+  ol, ul { padding-left: 22px; }
+  li { margin: 6px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 14.5px; }
+  th, td { border: 1px solid var(--line); padding: 9px 12px; text-align: left; vertical-align: top; }
+  th { color: var(--paper); background: var(--ink-2); }
+  .back { display: inline-block; margin-bottom: 30px; font-size: 14px; text-decoration: none; }
+  footer { margin-top: 46px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="/hindsight/">&larr; Hindsight</a>
+
+  <h1>Privacy Policy</h1>
+  <p class="up">Hindsight for iOS and Android &middot; last updated 9 August 2026</p>
+
+  <p>Hindsight is a tool for YouTube creators. It reads the public captions of
+  videos you point it at and turns them into ideas, checks, clips and metadata.</p>
+
+  <h2>What we collect</h2>
+  <p><strong>No account, no sign-in.</strong> Hindsight has no login. We do not ask
+  for your name, email, phone number, or any other personal identifier.</p>
+  <p><strong>No advertising or tracking SDKs.</strong> The app contains no analytics,
+  no advertising network, and no third-party tracker. We do not build a profile
+  of you and we do not sell data, because we do not have any to sell.</p>
+
+  <h2>What stays on your device</h2>
+  <p>The list of channels you have added and which one is currently selected is
+  stored locally on your device, along with a cache of previously-viewed results
+  so the app works without a connection. Deleting the app deletes all of it.</p>
+
+  <h2>What is sent to our server</h2>
+  <p>When you add a channel, the app sends the <strong>YouTube video links you
+  paste</strong> to the Hindsight API at <code>dev.perspectivity.co</code>. The
+  server then:</p>
+  <ol>
+    <li>fetches the publicly available caption file for each video;</li>
+    <li>sends that transcript text to Google's Gemini API for summarisation,
+        analysis, and embedding;</li>
+    <li>stores the resulting transcript, analysis, and search index so the tools
+        can run against it.</li>
+  </ol>
+  <p>When you use a tool (Idea Hub, Pre-flight, Clip Finder, Metadata Studio), the
+  text you supply — for example a draft script pasted into Pre-flight — is sent
+  to the server and to the Gemini API to produce the result. Draft text is used
+  to generate your answer and is not published or shared.</p>
+  <p>Our server records ordinary web-server logs (IP address, timestamp, requested
+  path) for security and debugging. These are not linked to any identity.</p>
+
+  <h2>Third parties</h2>
+  <ul>
+    <li><strong>Google Gemini API</strong> — processes transcript and draft text to
+      produce analysis. Governed by
+      <a href="https://policies.google.com/privacy">Google's privacy policy</a>.</li>
+    <li><strong>YouTube</strong> — video thumbnails and the embedded player load
+      directly from YouTube, which may set its own cookies. Governed by the same
+      policy.</li>
+  </ul>
+  <p>We use no other third-party processors.</p>
+
+  <h2>Content you index</h2>
+  <p>Hindsight is designed for use on <strong>your own channel</strong> — the archive
+  you have rights to. Indexed transcripts and analyses are retained so the tools
+  stay fast. To have a channel's data deleted from the server, email the address
+  below with the channel name and we will remove it.</p>
+
+  <h2>Children</h2>
+  <p>Hindsight is a professional tool for content creators and is not directed at
+  children under 13. We do not knowingly collect information from children.</p>
+
+  <h2>Summary</h2>
+  <table>
+    <tr><th>Question</th><th>Answer</th></tr>
+    <tr><td>Does the app collect personal data?</td><td>No</td></tr>
+    <tr><td>Is anything linked to your identity?</td><td>No — there is no account</td></tr>
+    <tr><td>Is data used for tracking or ads?</td><td>No</td></tr>
+    <tr><td>Third-party analytics or ad SDKs?</td><td>None</td></tr>
+    <tr><td>Encrypted in transit?</td><td>Yes, HTTPS</td></tr>
+    <tr><td>Can you request deletion?</td><td>Yes, by email</td></tr>
+  </table>
+
+  <h2>Changes</h2>
+  <p>If this policy changes materially, the date at the top will change and the new
+  version will be published at this URL.</p>
+
+  <footer>
+    Questions or deletion requests:
+    <a href="mailto:brishtiteveja@gmail.com">brishtiteveja@gmail.com</a><br>
+    Hindsight by Perspectivity &middot;
+    <a href="https://github.com/brishtiteveja/hindsight">source on GitHub</a>
+  </footer>
+</main>
+</body>
+</html>
