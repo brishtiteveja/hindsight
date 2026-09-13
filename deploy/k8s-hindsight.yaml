@@ -1,0 +1,23 @@
+# Route https://dev.perspectivity.co/hindsight through the k8s Ingress to the
+# host nginx on :8090 (which strips the prefix and proxies to the Hindsight API
+# on :8300). Mirrors the 8kEdu subpath pattern.
+apiVersion: v1
+kind: Service
+metadata:
+  name: hindsight
+  namespace: default
+spec:
+  ports:
+    - port: 80
+      targetPort: 8090
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: hindsight
+  namespace: default
+subsets:
+  - addresses:
+      - ip: 167.86.98.204
+    ports:
+      - port: 8090
