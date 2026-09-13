@@ -128,12 +128,22 @@ function drawGalaxy() {
 
   // cluster labels
   ctx.textAlign = "center";
-  for (const l of G.labels) {
+  const mobileLabels = w <= 800;
+  const labelRects = [];
+  for (const l of [...G.labels].sort((a,b)=>b.n-a.n)) {
+    if (mobileLabels && labelRects.length >= 5) break;
     if (gFilter.issue >= 0 && G.issues[gFilter.issue] !== l.key) continue;
-    const px = sx(l.x), py = sy(l.y);
+    let px = sx(l.x); const py = sy(l.y);
     if (px < 0 || py < 0 || px > w || py > h) continue;
-    const size = Math.max(12, Math.min(26, 9 + l.n / 220));
+    const size = mobileLabels ? 12 : Math.max(12, Math.min(26, 9 + l.n / 220));
     ctx.font = `700 ${size}px Fraunces, Georgia, serif`;
+    if (mobileLabels) {
+      const half = ctx.measureText(l.label).width/2;
+      px = Math.max(half+12,Math.min(w-half-12,px));
+      const rect = {left:px-half-4,right:px+half+4,top:py-16,bottom:py+7};
+      if (labelRects.some(r=>rect.left<r.right && rect.right>r.left && rect.top<r.bottom && rect.bottom>r.top)) continue;
+      labelRects.push(rect);
+    }
     ctx.lineWidth = 4; ctx.strokeStyle = "rgba(8,7,5,.92)";
     ctx.strokeText(l.label, px, py);
     ctx.fillStyle = l.hue;
@@ -453,9 +463,11 @@ function drawHomeGalaxy() {
   homeLayout = {x,y,k};
   const labels = $("home-cluster-labels");
   labels.innerHTML = "";
-  for (const l of d.labels.filter(l=>l.n>700)) {
+  labels.style.top = `${cv.offsetTop}px`;
+  labels.style.height = `${h}px`;
+  for (const l of d.labels.filter(l=>l.n>700).sort((a,b)=>b.n-a.n).slice(0,w<=800?5:99)) {
     const b = document.createElement("button");
-    b.textContent = l.label; b.style.left = `${l.x*k+x}px`; b.style.top = `${l.y*k+y}px`; b.style.color = l.hue;
+    b.textContent = l.label; b.style.left = `${w<=800?Math.max(90,Math.min(w-90,l.x*k+x)):l.x*k+x}px`; b.style.top = `${l.y*k+y}px`; b.style.color = l.hue;
     b.setAttribute("aria-label", `Explore ${l.label}, ${l.n.toLocaleString()} videos`);
     b.title = `${l.n.toLocaleString()} videos · Open this issue in the Galaxy`;
     b.onclick = () => homeOpenCluster(l.key);
@@ -504,7 +516,7 @@ function fitGalaxyMatches() {
   let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
   for(let i=0;i<G.n;i++) if(gMatch[i]){minX=Math.min(minX,G.x[i]);maxX=Math.max(maxX,G.x[i]);minY=Math.min(minY,G.y[i]);maxY=Math.max(maxY,G.y[i]);}
   if(!Number.isFinite(minX)){fitGalaxy();return;}
-  const left=w>720?280:24, right=35, top=90, bottom=95;
+  const left=w>800?280:24, right=35, top=90, bottom=95;
   const k=Math.min((w-left-right)/Math.max(100,maxX-minX+90),(h-top-bottom)/Math.max(100,maxY-minY+90),3);
   gZoomAnim=null;gView.k=k;gView.x=left+(w-left-right)/2-(minX+maxX)/2*k;gView.y=top+(h-top-bottom)/2-(minY+maxY)/2*k;
   queueDraw();
@@ -516,7 +528,7 @@ function drawGalaxyThumbnails(ctx,w,h){
   for(let i=0;i<G.n&&count<44;i++){
     if(!gMatch[i])continue;
     const px=sx(G.x[i]),py=sy(G.y[i]);
-    if(px<12||py<80||px>w-20||py>h-80||(w>720&&px<280))continue;
+    if(px<12||py<80||px>w-20||py>h-80||(w>800&&px<280))continue;
     const cell=`${Math.floor(px/74)}:${Math.floor(py/74)}`;if(occupied.has(cell))continue;occupied.add(cell);count++;
     const id=G.v[i];let img=gThumbImages.get(id);
     if(!img){img=new Image();img.onload=()=>{if(!$("view-galaxy").hidden)queueDraw();};img.src=`https://i.ytimg.com/vi/${encodeURIComponent(id)}/default.jpg`;gThumbImages.set(id,img);if(gThumbImages.size>220)gThumbImages.delete(gThumbImages.keys().next().value);}

@@ -12,7 +12,14 @@ const PALETTE = ["#f0b243","#7fd6a4","#c9a7f5","#ff7b66","#8fb7de",
 /* ── routing ── */
 let BROWSE = null;   // cached /v1/browse payload
 
+function toggleMobileNav() {
+  const open = $("topbar").classList.toggle("nav-expanded");
+  $("nav-more").setAttribute("aria-expanded", String(open));
+}
+
 function go(view, slug) {
+  $("topbar").classList.remove("nav-expanded");
+  $("nav-more")?.setAttribute("aria-expanded", "false");
   for (const v of ["home", "map", "channel", "collection", "galaxy", "cut", "ledger", "targets", "liars", "onboard"])
     $("view-" + v).hidden = view !== v;
   document.querySelectorAll(".top-nav [data-nav]").forEach((b) =>

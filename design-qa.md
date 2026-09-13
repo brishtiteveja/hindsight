@@ -25,3 +25,9 @@ Verified: hover details and click-through from Government Reform to its 6,113-vi
 Follow-up: further illustration/motion polish and full keyboard/accessibility review are deferred. The final compact-mobile screenshot was inspected; both suggestions and the composer are fully visible.
 
 final result: passed
+
+### Mobile polish and friendly entry points
+
+Reworked the landing page into stacked hero, discovery input, map and status sections on phones. Add a video remains visible beside the brand; More reveals the secondary routes. Mobile map labels are limited and collision-checked, and the Galaxy filter control now opens the correct panel. Channel grids use a shrinkable column instead of expanding the page; forms, toolbars, player and chat respect phone widths. Added smile icons and a short, three-cycle bounce to the import/chat entry points; reduced-motion disables it.
+
+Live Chrome verification: Home, Galaxy, Narrative Cut, What happened, Targets, Liars, Studio, Import and a loaded channel have no horizontal page overflow at 320, 390 and 768px. All ten channel lenses fit at 390px. More navigation, Galaxy filters, chat opening/header close and reduced-motion behavior passed. Desktop 1440px also fits. Screenshots: `/tmp/hindsight-mobile-after.png`, `/tmp/hindsight-mobile-galaxy-final.png`, `/tmp/hindsight-mobile-channel-final.png`, `/tmp/hindsight-mobile-chat.png`, `/tmp/hindsight-desktop-responsive.png`. No JavaScript page errors during the route checks. These checks verify layout and navigation, not every data-generation operation.

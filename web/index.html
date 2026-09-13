@@ -7,7 +7,7 @@
 <meta name="description" content="Every channel remembers what it said. Chat with a channel's history, watch its framing evolve, see the receipts."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="style.css?v=23"/>
+<link rel="stylesheet" href="style.css?v=24"/>
 <!-- In-studio agent. CopilotKit's stylesheet is scoped under [data-copilotkit]
      with cpk:-prefixed utilities, so it cannot reach the studio's own styles. -->
 <link rel="stylesheet" href="agent/hs-agent.css?v=2"/>
@@ -23,6 +23,7 @@
     <button data-nav="home" onclick="go('home')">Home</button>
     <button data-nav="map" class="on" onclick="go('map')">Studio</button>
     <button data-nav="galaxy" onclick="go('galaxy')">Galaxy</button>
+    <button class="nav-more" id="nav-more" aria-expanded="false" onclick="toggleMobileNav()">More ▾</button>
     <button data-nav="cut" onclick="go('cut')">Narrative Cut</button>
     <button data-nav="ledger" onclick="go('ledger')">What happened</button>
     <div class="nav-drop" id="nav-drop">
@@ -33,8 +34,8 @@
         <button data-nav="liars" onclick="go('liars')">⚡ Who's lying?</button>
       </div>
     </div>
-    <button class="nav-add" onclick="go('onboard')">＋ Add a video</button>
   </nav>
+  <button class="nav-add" onclick="go('onboard')"><span class="happy-icon" aria-hidden="true">☺</span> Add a video</button>
   <div class="tagline">the YouTube narrative map</div>
   <a class="repo-link" href="https://github.com/brishtiteveja/hindsight" target="_blank" rel="noopener noreferrer" aria-label="Hindsight source code on GitHub (opens in a new tab)"><img src="icons/github.svg" width="18" height="18" alt=""/>GitHub</a>
 </header>
@@ -52,7 +53,7 @@
     </section>
     <form class="home-discovery" onsubmit="event.preventDefault();homeDiscover(event);return false" ondragover="event.preventDefault();this.classList.add('is-dragging')" ondragleave="this.classList.remove('is-dragging')" ondrop="homeDrop(event)">
       <label for="home-query">YOUR NEXT INVESTIGATION STARTS HERE</label>
-      <div><input id="home-query" placeholder="Search a topic, creator, or paste a YouTube link…" autocomplete="off" oninput="homeQueryLabel()"/><button id="home-query-go" type="submit">Search archive</button></div>
+      <div><input id="home-query" placeholder="Topic, creator, or YouTube link…" autocomplete="off" oninput="homeQueryLabel()"/><button id="home-query-go" type="submit">Search archive</button></div>
       <span>Find videos in the map · Drop a YouTube link to build its memory</span>
     </form>
     <button id="gx-motion" class="gx-motion" onclick="gxToggleMotion()" aria-pressed="false">Pause motion</button>
@@ -98,7 +99,7 @@
     <div class="gx-mobilebar">
       <button onclick="gxZoomBtn(1.5)" title="zoom in">＋</button>
       <button onclick="gxZoomBtn(1/1.5)" title="zoom out">−</button>
-      <button onclick="document.querySelector('.gx-wrap').classList.toggle('panel-open')" title="filters">☰</button>
+      <button onclick="document.querySelector('#view-galaxy .gx-wrap').classList.toggle('panel-open')" title="filters">☰</button>
       <button onclick="gxReset()" title="reset">⤾</button>
     </div>
     <div class="gx-bottom">
@@ -424,8 +425,8 @@
   <span>Hindsight · own-channel-first transcript intelligence · MIT</span>
 </footer>
 <script src="https://www.youtube.com/iframe_api"></script>
-<script src="app.js?v=25"></script>
-<script src="galaxy.js?v=9"></script>
+<script src="app.js?v=26"></script>
+<script src="galaxy.js?v=10"></script>
 <script src="cut.js?v=2"></script>
 <!-- The agent island mounts here. Loaded last so the studio's bridge functions
      (hsOpenLens / hsPlayMoment / hsContext) exist before any tool can fire. -->
