@@ -1242,3 +1242,16 @@ footer { padding: 18px 28px; border-top: 1px solid var(--line); color: var(--fai
 .pg-skel b { height: 17px; width: 46%; margin-bottom: 10px; }
 .pg-skel u { height: 11px; width: 88%; margin-top: 7px; }
 @keyframes shimmer { to { background-position: -120% 0; } }
+
+/* Attribution on a pre-flight receipt. The analyzer labels every extracted
+   claim "host" by default, so an unnamed speaker is an absence of evidence,
+   not a finding — the UI says so rather than letting the reader assume. */
+.pf-speaker {
+  font-size: 11px; padding: 1px 6px; border-radius: 5px;
+  border: 1px solid var(--line); color: var(--faint); white-space: nowrap;
+}
+.pf-speaker.named { color: var(--paper-dim); }
+.pf-speaker.unverified { font-style: italic; }
+.pf-pill.archive_conflict { background: #3a2413; color: var(--amber-2); }
+.pf-claim.archive_conflict { border-color: #4a3320; }
+.pf-verdict.archive_conflict { background: #3a2413; color: var(--amber-2); }

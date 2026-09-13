@@ -653,7 +653,12 @@ const postJSON = (url, body) =>
 
 /* ── Pre-flight ── */
 const VERDICT_LABEL = {
-  contradiction: "reversal", drift: "drift", consistent: "consistent", new: "new ground",
+  contradiction: "reversal",
+  // Deliberately not "reversal": the earlier claim clashes, but the analyzer
+  // could not establish who said it, and on an interview channel that is often
+  // a guest. Saying the creator reversed themselves would be unfounded.
+  archive_conflict: "conflicts with archive",
+  drift: "drift", consistent: "consistent", new: "new ground",
 };
 
 async function runPrecheck() {
@@ -684,6 +689,8 @@ async function runPrecheck() {
         ${(c.past || []).map((p) => `
           <div class="pf-past">
             <span class="pf-past-date">${p.date}</span>
+            <span class="pf-speaker ${p.attribution || "unverified"}">${
+              p.attribution === "named" ? esc(p.speaker) : "speaker unverified"}</span>
             <span class="pf-past-text">"${esc(p.text)}"</span>
             <button class="pf-play" onclick="play('${p.video_id}',${p.t},'${esc(p.title).replace(/'/g, "\\'")}')">
               ▶ ${fmtT(p.t)}</button>

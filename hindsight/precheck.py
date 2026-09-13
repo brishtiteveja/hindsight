@@ -15,6 +15,19 @@ from .store import ChannelStore
 MIN_COSINE = 0.55
 TOP_PAST = 4
 
+# Actor labels that carry no identity. The analyzer defaults to "host" for every
+# claim it extracts, so on an interview channel most of these are actually
+# guests — the label is a placeholder, not a finding. Treating it as proof that
+# the creator said something is how you end up telling someone they reversed
+# themselves on a sentence their guest spoke.
+UNVERIFIED_ACTORS = {"", "host", "narrator", "channel", "speaker", "unknown", "n/a"}
+
+
+def attribution_of(actor: str) -> str:
+    """'named' when we have a real speaker, 'unverified' otherwise."""
+    return "unverified" if (actor or "").strip().lower() in UNVERIFIED_ACTORS \
+        else "named"
+
 _EXTRACT = """Extract the checkable factual/positional claims this video script
 makes — the statements an audience could later hold the creator to. Skip
 pleasantries, calls to action, and pure description.
@@ -25,12 +38,17 @@ SCRIPT:
 {script}
 """
 
-_JUDGE = """For each numbered pair, decide how the NEW claim relates to what this
-channel said BEFORE:
-  "contradiction" — they cannot both be true; the creator has reversed
+_JUDGE = """For each numbered pair, decide how the NEW claim relates to a claim
+published earlier on this channel:
+  "contradiction" — they cannot both be true
   "drift"         — same topic, meaningfully softened/hardened position
-  "consistent"    — agrees with the past claim
+  "consistent"    — agrees with the earlier claim
   "unrelated"     — not really the same subject
+
+Judge only whether the two statements conflict. Do NOT assume the same person
+made both: an earlier claim may have been spoken by a guest. Where a speaker is
+shown as "unverified", write the reason without attributing the earlier claim to
+the creator — say "the channel published" rather than "you said".
 
 Return ONLY JSON: {{"verdicts":[{{"pair":1,"verdict":"...","why":"one line"}}]}}
 
@@ -43,9 +61,12 @@ def _past_claims(store: ChannelStore) -> list[dict]:
     for d in store.digests():
         for c in d.get("claims") or []:
             if c.get("claim"):
+                actor = (c.get("actor") or "").strip()
                 rows.append({"text": c["claim"], "quote": c.get("quote", ""),
                              "video_id": d["video_id"], "title": d.get("title", ""),
-                             "date": (d.get("published_at") or "")[:10]})
+                             "date": (d.get("published_at") or "")[:10],
+                             "speaker": actor,
+                             "attribution": attribution_of(actor)})
     return rows
 
 
@@ -94,7 +115,9 @@ def check(store: ChannelStore, script: str) -> dict:
         chunk = flat[chunk_start:chunk_start + 15]
         listing = "\n".join(
             f"{n+1}. NEW: \"{new_claims[i]}\"\n"
-            f"   BEFORE [{past[j]['date']}]: \"{past[j]['text']}\""
+            f"   BEFORE [{past[j]['date']}, speaker: "
+            f"{past[j]['speaker'] if past[j]['attribution'] == 'named' else 'unverified'}]: "
+            f"\"{past[j]['text']}\""
             for n, (i, j, _) in enumerate(chunk))
         try:
             out = generate_json(_JUDGE.format(pairs=listing))
@@ -107,7 +130,8 @@ def check(store: ChannelStore, script: str) -> dict:
                 verdicts[(i, j)] = {"verdict": v.get("verdict", "unrelated"),
                                     "why": v.get("why", "")}
 
-    RANK = {"contradiction": 3, "drift": 2, "consistent": 1, "unrelated": 0}
+    RANK = {"contradiction": 3, "archive_conflict": 3, "drift": 2,
+            "consistent": 1, "unrelated": 0}
     results = []
     for i, claim in enumerate(new_claims):
         matches = []
@@ -116,8 +140,13 @@ def check(store: ChannelStore, script: str) -> dict:
             if not v or v["verdict"] == "unrelated":
                 continue
             p = past[j]
+            verdict = v["verdict"]
+            # A clash with a claim we cannot attribute is a conflict with the
+            # channel's archive, not evidence the creator reversed themselves.
+            if verdict == "contradiction" and p["attribution"] != "named":
+                verdict = "archive_conflict"
             matches.append({
-                **p, "similarity": round(s, 3), "verdict": v["verdict"], "why": v["why"],
+                **p, "similarity": round(s, 3), "verdict": verdict, "why": v["why"],
                 "t": _second_for(store, p["video_id"], p["text"]),
             })
         matches.sort(key=lambda m: -RANK.get(m["verdict"], 0))
@@ -126,7 +155,8 @@ def check(store: ChannelStore, script: str) -> dict:
         verdict = matches[0]["verdict"] if matches else "new"
         results.append({"text": claim, "verdict": verdict, "past": matches[:3]})
 
-    order = {"contradiction": 0, "drift": 1, "consistent": 2, "new": 3}
+    order = {"contradiction": 0, "archive_conflict": 1, "drift": 2,
+             "consistent": 3, "new": 4}
     results.sort(key=lambda r: order.get(r["verdict"], 9))
     counts: dict[str, int] = {}
     for r in results:

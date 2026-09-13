@@ -134,8 +134,13 @@ SCHEMAS = [
     _tool("check_draft",
           "Check a draft script against everything the channel has published. "
           "Each extracted claim comes back judged consistent / drift / "
-          "reversal with the past video and second that conflicts. Use whenever "
-          "the user pastes or references a script they are about to publish.",
+          "archive_conflict / contradiction, with the past video and second that "
+          "clashes. Note the difference: 'contradiction' means the same named "
+          "speaker reversed themselves, while 'archive_conflict' means the past "
+          "claim's speaker could not be established — often a guest — so report "
+          "it as conflicting with the channel's archive, never as the creator "
+          "reversing themselves. Each past claim carries speaker and "
+          "attribution fields; respect them.",
           {"channel": _CHANNEL,
            "script": {"type": "string", "description": "The draft script text."}},
           ["channel", "script"]),
