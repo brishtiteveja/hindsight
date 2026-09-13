@@ -35,6 +35,13 @@ page.on("response", (r) => {
 
 await page.goto(url, { waitUntil: "networkidle", timeout: 60000 });
 
+// networkidle fires before React has committed, so waiting on the network alone
+// reports a false regression roughly one run in three. Wait for the mount itself.
+await page.waitForFunction(
+  () => document.getElementById("hs-agent")?.childElementCount > 0,
+  null, { timeout: 30000 },
+).catch(() => {});   // fall through: the assertions below report the real state
+
 // The studio's half of the bridge.
 const bridge = await page.evaluate(() => ({
   hsContext: typeof window.hsContext,

@@ -14,8 +14,8 @@ The event work adds a tool-calling agent, streaming transports, and CopilotKit i
 
 ## Required links
 
-- Repository candidate: https://github.com/brishtiteveja/hindsight — public visibility and clean-clone execution not yet verified.
-- Live app: https://dev.perspectivity.co/hindsight/ — existing studio verified; new agent deployment needs verification.
+- Repository candidate: https://github.com/brishtiteveja/hindsight — public visibility verified through the unauthenticated GitHub API; clean-clone execution pending.
+- Live app: https://dev.perspectivity.co/hindsight/ — studio verified; agent tool endpoint now responds with 12 tools. Complete browser workflow still needs verification.
 - Two-minute video: **pending recording and upload**.
 - Public social post: **pending team publication**.
 
