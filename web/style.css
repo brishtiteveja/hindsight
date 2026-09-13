@@ -1279,13 +1279,15 @@ footer { padding: 18px 28px; border-top: 1px solid var(--line); color: var(--fai
 
 /* Mobile discovery uses real document flow, keeping the map clear of controls. */
 .top-nav .nav-more{display:none}
-.happy-icon{display:inline-block;font-size:20px;line-height:1;vertical-align:-2px;margin-right:4px}
-@keyframes happy-hop{0%,82%,100%{transform:translateY(0) rotate(0)}86%{transform:translateY(-5px) rotate(-8deg)}90%{transform:translateY(0) rotate(5deg)}94%{transform:translateY(-2px) rotate(0)}}
-.nav-add .happy-icon{animation:happy-hop 6s ease-in-out 3}
-[data-testid="copilot-chat-toggle"][data-state="closed"]{animation:happy-hop 7s ease-in-out 3;animation-delay:2s}
-[data-slot="chat-toggle-button-open-icon"] svg{display:none}
-[data-slot="chat-toggle-button-open-icon"]::after{content:'☺';font:36px/1 Georgia,serif}
-.nav-add:hover .happy-icon{animation:happy-hop 1s ease-in-out}
+/* Light catches the entry points; icons stay stable and legible. */
+.nav-add{position:relative;overflow:hidden;border:1px solid #705329;background:linear-gradient(120deg,#34250f,#1b160e)!important;box-shadow:inset 0 1px 0 #f0b24324;transition:border-color .2s,box-shadow .2s,transform .2s}
+.nav-video-icon{display:inline-block;vertical-align:-4px;margin-right:5px}
+.nav-add::after{content:"";position:absolute;inset:-40% -60%;pointer-events:none;background:linear-gradient(110deg,transparent 40%,#ffdf9c24 49%,transparent 58%);transform:translateX(-70%);animation:entry-sheen 7s ease-in-out 3}
+.nav-add:hover{transform:translateY(-1px);box-shadow:0 4px 20px #f0b24320,inset 0 1px 0 #ffdf9c40;border-color:var(--amber)!important}
+[data-testid="copilot-chat-toggle"][data-state="closed"]{background:linear-gradient(145deg,#ffda87,#efa923);box-shadow:0 5px 24px #0006,inset 0 1px 0 #fff6;isolation:isolate}
+[data-testid="copilot-chat-toggle"][data-state="closed"]::before{content:"";position:absolute;inset:-5px;border:1px solid #f0b24380;border-radius:inherit;pointer-events:none;animation:entry-halo 6s ease-out 3}
+@keyframes entry-sheen{0%,72%{transform:translateX(-70%)}92%,100%{transform:translateX(70%)}}
+@keyframes entry-halo{0%,55%,100%{opacity:0;transform:scale(1)}65%{opacity:.65;transform:scale(1)}90%{opacity:0;transform:scale(1.22)}}
 @media(max-width:1100px){#topbar{flex-wrap:wrap;align-items:center}.tagline{display:none}.top-nav{order:4;width:100%;margin-left:0}.brand{margin-right:auto}}
 @media(max-width:800px){
   #topbar{display:flex;gap:8px;padding:10px 16px;align-items:center;flex-shrink:0}
@@ -1338,7 +1340,7 @@ footer { padding: 18px 28px; border-top: 1px solid var(--line); color: var(--fai
   #hs-agent [data-testid="copilot-chat-textarea"]{font-size:16px}
 }
 @media(max-width:360px){#topbar{padding:10px;gap:6px}.brand-name{font-size:19px}.nav-add{padding:8px;font-size:11px}.gx-intro h1{font-size:40px}.gx-intro-actions button{padding:10px}.gx-story-source{grid-template-columns:76px minmax(0,1fr)}}
-@media(prefers-reduced-motion:reduce){.nav-add .happy-icon,[data-testid="copilot-chat-toggle"][data-state="closed"],.nav-add:hover .happy-icon{animation:none}}
+@media(prefers-reduced-motion:reduce){.nav-add::after,[data-testid="copilot-chat-toggle"]::before{animation:none;opacity:0}.nav-add:hover{transform:none}}
 @media(max-width:900px){.channel-layout{grid-template-columns:minmax(0,1fr)}.persona-pane{min-width:0;max-width:100%}.chat-hint{width:100%;max-width:520px}.hint-chips .chip{white-space:normal;line-height:1.6}.pc-head>div{min-width:0}.pc-span{overflow-wrap:anywhere}.lens-nav{max-width:100%}.chat-form{max-width:100%}.chat-form textarea{min-width:0}}
 @media(max-width:800px){.pc-narr{display:none}.pc-topics .pc-topic:nth-child(n+4){display:none}.persona-pane .lens-nav{min-height:44px}.lens-nav button{flex-shrink:0}.chat-hint{padding:16px 0}.chat-form input{min-width:0;font-size:16px}.persona-pane{padding-bottom:10px}}
 @media(max-width:800px){#view-galaxy .gx-side{display:none;left:10px;top:auto}#view-galaxy .gx-wrap.panel-open .gx-side{display:flex}#view-galaxy .gx-mobilebar{display:flex!important}.top-nav button:focus-visible,.nav-add:focus-visible{outline:2px solid var(--amber);outline-offset:2px}}
