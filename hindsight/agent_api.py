@@ -8,11 +8,11 @@ no sse_starlette dependency for what is a one-line framing format.
 import json
 from typing import Iterator
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from . import agent, agent_tools
+from . import agent, agent_tools, agui
 
 router = APIRouter(prefix="/v1/agent", tags=["agent"])
 
@@ -47,6 +47,21 @@ def chat(body: ChatBody):
         media_type="text/event-stream",
         # nginx buffers SSE by default, which turns a live stream into one
         # delivery at the end; this is the header that stops it.
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+@router.post("/agui")
+async def agui_endpoint(request: Request):
+    """AG-UI endpoint for the in-studio CopilotKit agent.
+
+    Takes the raw body rather than a pydantic model: RunAgentInput carries
+    forwardedProps/state as free-form JSON, and a strict model here would reject
+    payload shapes that the protocol allows and the client legitimately sends."""
+    body = await request.json()
+    return StreamingResponse(
+        agui.run_agui(body),
+        media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
 
