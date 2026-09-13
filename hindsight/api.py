@@ -19,7 +19,8 @@ from pydantic import BaseModel
 
 from fastapi.responses import Response
 
-from . import (artwork, dgx, factcheck, frames, ideas as ideas_mod, insights,
+from . import (agent_api, artwork, dgx, factcheck, frames, ideas as ideas_mod,
+               insights,
                mosaics,
                onboard as onboard_mod, precheck as precheck_mod, precompute, story,
                studio,
@@ -34,6 +35,10 @@ from .store import ChannelStore, list_channels
 app = FastAPI(title="Perspectivity Transcript API", version="0.1.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"],
                    allow_methods=["*"], allow_headers=["*"])
+
+# The agent surface. Registered before the static mount at the bottom of this
+# module, or StaticFiles("/") would swallow these paths.
+app.include_router(agent_api.router)
 
 
 class AskBody(BaseModel):
