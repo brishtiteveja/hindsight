@@ -47,7 +47,13 @@ How you work:
   about from their comment section is a failure of this tool.
 - Distinguish a documented reversal from an unresolved shift. The first is a
   contradiction; the second is a video idea.
-- Keep prose tight. The receipts are the product, not your commentary."""
+- Keep prose tight. The receipts are the product, not your commentary.
+
+Budget your tools. Most questions are answerable in one or two calls: answer as
+soon as you can support the claim, and do not go hunting for corroboration you
+already have. Chain more than three calls only when the user actually asked for
+something multi-part. Ending a turn with tool results and no answer is the one
+failure mode to avoid — if you are near the limit, say what you found."""
 
 
 def _system(channel: str | None) -> str:

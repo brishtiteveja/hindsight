@@ -120,8 +120,8 @@ folder to forget a channel.
 
 ## What was built during the hackathon
 
-The rules allow reusing existing components; these are the parts that are
-net-new, and the commit history separates them cleanly:
+The rules allow reusing existing components. These are the parts that are
+net-new:
 
 - **`agent.py`** — the tool-calling loop, streaming, with browser-executed tools
 - **`agent_tools.py`** — the engine exposed as 11 tool schemas + dispatch
@@ -131,10 +131,9 @@ net-new, and the commit history separates them cleanly:
   a single-cue matcher whose ties always resolved to the earliest caption
 - the in-studio CopilotKit surface and the `hindsight agent` CLI
 
-**Reused as a building block:** the Perspectivity transcript-intelligence engine
-(ingest/analyze/index/persona/contradictions), the studio frontend, and the
-already-collected corpus. Every commit that carries it in says so in its
-message.
+**Reused as a building block:** the underlying transcript-intelligence engine
+(ingest / analyze / index / persona / contradictions), the studio frontend, and
+the already-collected corpus.
 
 ## License
 
