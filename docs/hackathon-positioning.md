@@ -4,11 +4,13 @@ Working brief, September 13, 2026. Scores are not predicted: every criterion nee
 
 ## Position
 
-**Hindsight — check your next draft against your published past.**
+**Hindsight — the YouTube narrative map.**
 
-For a creator reviewing a script before recording, Hindsight uses the channel and draft already open in the studio to find potentially conflicting past statements, explain the difference, and bring the supporting transcript into view. The creator decides whether to revise or explain the change.
+The user's motivation is understanding how creators talk about issues and how their framing changes over time. Lead with that exploration: select an issue, follow a sequence of videos, ask the agent to investigate the framing, and inspect the source moments. Draft checking is a useful secondary action, not the whole product identity.
 
-Lead with this one interaction. The corpus, Galaxy, clips, metadata, and mobile app are supporting capabilities; they are not five separate pitches. Avoid claiming to have read “everything” when the indexed catalogue is incomplete. A channel is not necessarily one speaker.
+The homepage design is awaiting selection from the three displayed concepts. Do not assume a choice. Keep the existing dark-and-amber identity and implement one complete investigation path. Avoid adding new surfaces or integrations before recording.
+
+**Time boundary:** the user gave 90 minutes for code and verification at approximately 04:02 UTC on September 13. Freeze implementation by **05:32 UTC (07:32 Berlin)** or earlier, preserving their final recording window. Further ideas belong in `docs/NEXT.md`.
 
 ## Published rubric
 
@@ -25,15 +27,15 @@ More sponsor logos or more surfaces are not independent rubric criteria. This is
 
 ## Most important work, in order
 
-1. Prove the agent's complete browser workflow on a preview server before restarting the live backend. The last verified live process lacked the agent routes.
-2. Make context essential: share the editor draft and selected channel. Render tool results into the actual Pre-flight view; do not merely switch to an empty lens.
+1. Verify the selected narrative-first homepage interaction. The agent endpoint now responds and the draft workflow completed live; the new narrative entry path is still to build.
+2. Make context essential: pass the selected issue and source videos to the agent. The existing draft/channel context flow is verified; preserve it as a secondary demonstration.
 3. Make evidence defensible: preserve who said the prior claim, use actual transcript excerpts, and resolve a relevant moment. Treat uncertain attribution as a channel-archive conflict, not “you reversed yourself.”
 4. Fix the oversized video modal. Keep the close button and external YouTube link visible, and retain readable transcript evidence when embedding is blocked.
 5. Rehearse one short, clearly labeled hypothetical draft against a real, inspected source. It must be plausible, but it is not a real new statement by the creator.
 6. Confirm clean-clone setup and supply runnable example input; the private/local 49K corpus is excluded by .gitignore.
 7. Record under two minutes and finish every required link. Reserve upload time before the portal deadline.
 
-## Demo candidate to validate
+## Secondary demo candidate: draft review
 
 Channel: `dwarkesh-patel`.
 
@@ -45,7 +47,7 @@ Hypothetical draft for testing:
 
 This deliberately tests tension with archived statements. Do not claim a successful check until the actual tool returns relevant evidence. Do not label an actual creator as having made this hypothetical statement.
 
-## Two-minute narrative
+## Secondary demo: draft review
 
 - 0:00–0:12 — Show channel and hypothetical draft already in the editor. “Creators publish for years. Before recording the next script, they need to know where it conflicts with the archive.”
 - 0:12–0:25 — Ask “Check this draft against this channel's past statements and show the strongest evidence.” Do not repaste the draft into chat.
@@ -59,7 +61,7 @@ This is a target script, not a report of completed behavior. Record the actual w
 
 ## Inherited work and eligibility
 
-The existing studio and transcript engine were already running before the event. New event-period commits add provider routing, agent tools/loop, SSE, AG-UI and the CopilotKit island. Commit dates alone do not establish when the underlying work was authored.
+The transcript collection comes from Perspectivity.co and is existing work, as confirmed by the user. The existing studio and transcript engine were already running before the event. New event-period commits add provider routing, agent tools/loop, SSE, AG-UI and the CopilotKit island. Commit dates alone do not establish when the underlying work was authored.
 
 The event allows inherited building blocks but excludes extending a pre-existing project and entering it as new. Do not relabel the inherited studio to hide this. Seek organizer clarification on whether the distinct agent interaction qualifies when it uses the existing engine as infrastructure. That decision is not established by this document.
 

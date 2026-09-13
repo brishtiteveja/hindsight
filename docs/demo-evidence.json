@@ -1,0 +1,44 @@
+{
+  "topic": "AI regulation",
+  "channel": "dwarkesh-patel",
+  "provenance": "Existing transcripts collected by Perspectivity.co. Dates are archive metadata. Framing summaries are editorial interpretations, not verbatim quotations.",
+  "interpretation": "These examples share a critical stance while emphasizing different concerns. They do not establish a reversal by a particular person.",
+  "sources": [
+    {
+      "video_id": "unAEMjpvnkk",
+      "title": "Are we racing China just to become China?",
+      "archive_date": "2026-04-26",
+      "channel": "dwarkesh-patel",
+      "framing_label": "Government coercion",
+      "framing_summary": "The video frames AI governance as a question of government leverage over a private company.",
+      "second": 15,
+      "transcript_excerpt": "the government did. The government has threatened to destroy Anthropic as a private business because Anthropic refuses to sell to the government on terms that the government commands. The",
+      "url": "https://www.youtube.com/watch?v=unAEMjpvnkk&t=15s",
+      "thumbnail": "https://i.ytimg.com/vi/unAEMjpvnkk/mqdefault.jpg"
+    },
+    {
+      "video_id": "5Wvpc_2-7-U",
+      "title": "AI Regulation's Authoritarian Problem",
+      "archive_date": "2026-04-28",
+      "channel": "dwarkesh-patel",
+      "framing_label": "Vague definitions",
+      "framing_summary": "The argument focuses on how broad AI-risk terms could permit abuse.",
+      "second": 13,
+      "transcript_excerpt": "a wannabe despot. The underlying terms here like catastrophic risk or threats to national security or autonomy risk are so vague and so open to interpretation that you're just handing a fully loaded bazooka to a future power-hungry leader. These terms can mean whatever the government wants them",
+      "url": "https://www.youtube.com/watch?v=5Wvpc_2-7-U&t=13s",
+      "thumbnail": "https://i.ytimg.com/vi/5Wvpc_2-7-U/mqdefault.jpg"
+    },
+    {
+      "video_id": "yiaKkyx8g3s",
+      "title": "Why the Nukes Analogy for AI Is Wrong",
+      "archive_date": "2026-05-01",
+      "channel": "dwarkesh-patel",
+      "framing_label": "A different analogy",
+      "framing_summary": "The speaker challenges the nuclear-weapons analogy and compares AI to industrialization.",
+      "second": 31,
+      "transcript_excerpt": "used. But I think this is a terrible analogy. First, AI is not some self-contained weapon like a nuclear bomb, which only does one thing. Rather, it is more like the process of industrialization itself. Now, people",
+      "url": "https://www.youtube.com/watch?v=yiaKkyx8g3s&t=31s",
+      "thumbnail": "https://i.ytimg.com/vi/yiaKkyx8g3s/mqdefault.jpg"
+    }
+  ]
+}
