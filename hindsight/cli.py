@@ -6,6 +6,48 @@ import sys
 from pathlib import Path
 
 
+def _agent_repl(args):
+    """Same loop the studio drives, rendered for a terminal.
+
+    Tool calls and ui events print as they happen — the point is to watch the
+    agent reach for the catalogue, not just read its conclusion."""
+    from . import agent
+
+    channel = args.channel or None
+    history: list[dict] = []
+
+    def turn(question: str):
+        history.append({"role": "user", "content": question})
+        reply = []
+        for ev in agent.run(history, channel=channel):
+            kind = ev["type"]
+            if kind == "text":
+                reply.append(ev["delta"])
+                print(ev["delta"], end="", flush=True)
+            elif kind == "tool_call":
+                print(f"\n  \033[2m⚒ {ev['name']}({json.dumps(ev['args'])[:90]})\033[0m")
+            elif kind == "ui":
+                print(f"\n  \033[2m▸ studio: {ev['name']} {json.dumps(ev['args'])[:90]}\033[0m")
+            elif kind == "error":
+                print(f"\n  \033[31m! {ev['message']}\033[0m")
+        print()
+        history.append({"role": "assistant", "content": "".join(reply)})
+
+    if args.question:
+        turn(args.question)
+        return
+
+    print(f"Hindsight agent{f' — {channel}' if channel else ''}. Empty line to quit.")
+    while True:
+        try:
+            q = input("\nyou> ").strip()
+        except (EOFError, KeyboardInterrupt):
+            break
+        if not q:
+            break
+        turn(q)
+
+
 def main():
     ap = argparse.ArgumentParser(prog="hindsight",
                                  description="Chat with your channel's caption history.")
@@ -37,6 +79,10 @@ def main():
     p.add_argument("--channel", required=True)
     p.add_argument("--actor", default="")
 
+    p = sub.add_parser("agent", help="the tool-using agent in your terminal")
+    p.add_argument("question", nargs="?", default="")
+    p.add_argument("--channel", default="", help="optional; the agent can pick one")
+
     sub.add_parser("serve", help="run the Perspectivity Transcript API on :8300")
 
     args = ap.parse_args()
@@ -45,6 +91,10 @@ def main():
     if args.cmd == "serve":
         from .api import serve
         serve()
+        return
+
+    if args.cmd == "agent":
+        _agent_repl(args)
         return
 
     store = ChannelStore(args.channel)
