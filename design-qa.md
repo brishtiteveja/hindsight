@@ -12,11 +12,13 @@ Implementation: `docs/images/home.png`, `docs/images/investigation.png`; desktop
 - P2 fixed: motion control overlapped the chat launcher. Moved it clear of the launcher; reduced-motion disables the animation.
 - P2 fixed: mobile welcome content was too tall. Compact mobile spacing retains a scrollable content area and a reachable composer; the last-build capture shows both suggestions and the composer fully visible.
 
+- P2 fixed: rapid navigation could schedule a draw on a hidden, zero-size Galaxy canvas. Render guards now skip hidden or zero-size canvases.
+
 ## Fidelity and behavior
 
 Typography: Fraunces display and Inter interface text match the studio; smaller than the illustrative concept to accommodate actual context and controls. Spacing uses a distinct header, readable content and bottom composer. Colors use warm black, cream, amber and mint. Source images are real YouTube thumbnails with stable source IDs. UI icons come from the installed icon library. Copy describes persistent archive memory without claiming personal-memory persistence. The featured story identifies interpretation and attribution limits.
 
-Verified: hover details and click-through from Government Reform to its 6,113-video Galaxy filter; selected source context and suggested-prompt submission; real read_sources → play_moment agent workflow (17.309 seconds, no JavaScript errors); source dialog operable above chat; controlled success, HTTP failure, malformed error, edited-draft and empty-draft cases. Mobile sidebar fits 390×844 with no horizontal overflow and reduced-motion animation disabled.
+Verified: hover details and click-through from Government Reform to its 6,113-video Galaxy filter; selected source context and suggested-prompt submission; real read_sources → play_moment agent workflow (17.309 seconds locally; 15.377 seconds on the public backend), visible source-inspection progress and clickable source card; source dialog operable above chat; controlled success, HTTP failure, malformed error, edited-draft and empty-draft cases. Mobile sidebar fits 390×844 with no horizontal overflow and reduced-motion animation disabled.
 
 Follow-up: further illustration/motion polish and full keyboard/accessibility review are deferred. The final compact-mobile screenshot was inspected; both suggestions and the composer are fully visible.
 

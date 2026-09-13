@@ -8,7 +8,7 @@ Working brief, September 13, 2026. Scores are not predicted: every criterion nee
 
 The user's motivation is understanding how creators talk about issues and how their framing changes over time. Lead with that exploration: select an issue, follow a sequence of videos, ask the agent to investigate the framing, and inspect the source moments. Draft checking is a useful secondary action, not the whole product identity.
 
-The homepage design is awaiting selection from the three displayed concepts. Do not assume a choice. Keep the existing dark-and-amber identity and implement one complete investigation path. Avoid adding new surfaces or integrations before recording.
+The implemented Home uses a fine-point animated galaxy with hover descriptions and cluster links. The original interactive Galaxy remains separate. The dark contextual agent panel offers suggested investigations and source cards. Freeze new surfaces and integrations before recording.
 
 **Time boundary:** the user gave 90 minutes for code and verification at approximately 04:02 UTC on September 13. Freeze implementation by **05:32 UTC (07:32 Berlin)** or earlier, preserving their final recording window. Further ideas belong in `docs/NEXT.md`.
 

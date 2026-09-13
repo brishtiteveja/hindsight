@@ -50,6 +50,7 @@ function buildGrid() {
 function fitGalaxy() {
   const cv = $("gx-canvas");
   const w = cv.clientWidth, h = cv.clientHeight;
+  if (!w || !h) return;
   gView.k = Math.min(w, h) / (G.world * 1.06);
   gView.x = (w - G.world * gView.k) / 2;
   gView.y = (h - G.world * gView.k) / 2;
@@ -66,6 +67,7 @@ function drawGalaxy() {
   const cv = $("gx-canvas"), ctx = cv.getContext("2d");
   const dpr = window.devicePixelRatio || 1;
   const w = cv.clientWidth, h = cv.clientHeight;
+  if (!w || !h) return;
   if (cv.width !== w * dpr || cv.height !== h * dpr) {
     cv.width = w * dpr; cv.height = h * dpr;
   }
@@ -144,7 +146,8 @@ function snapAfterDraw(cv) {
 /* During interaction: transform the last bitmap (one drawImage per frame),
    then settle into a sharp full render when the hand stops. */
 function fastDraw() {
-  if (!gSnap || !gSnap.view) { queueDraw(); return; }
+  if ($("view-galaxy").hidden) return;
+  if (!gSnap || !gSnap.view || !gSnap.cv.width || !gSnap.cv.height) { queueDraw(); return; }
   const cv = $("gx-canvas"), ctx = cv.getContext("2d");
   const dpr = window.devicePixelRatio || 1;
   const w = cv.clientWidth, h = cv.clientHeight;

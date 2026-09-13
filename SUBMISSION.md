@@ -19,7 +19,7 @@ The user reports that an initial submission has already been made. This file is 
 ## Required links
 
 - Repository candidate: https://github.com/brishtiteveja/hindsight — public visibility verified through the unauthenticated GitHub API. An isolated export of the committed tree ingests the fictional sample and imports the API with 48 routes using already-installed dependencies. Fresh dependency installation and keyed analysis/indexing remain unverified.
-- Live app: https://dev.perspectivity.co/hindsight/ — studio verified; agent tool endpoint now responds with 12 tools. A second draft-to-result-to-source browser run completed in 34.336 seconds with no duplicate check; live attribution wording still needs the backend refresh; the narrative homepage workflow passed on the updated local backend in 17.309 seconds; final public-backend refresh remains.
+- Live app: https://dev.perspectivity.co/hindsight/ — 13 tools available after backend refresh. The public narrative workflow read the three selected transcripts and opened a source in 15.377 seconds. The earlier draft workflow completed in 34.336 seconds without a duplicate check; attribution handling was included in the backend refresh.
 - Two-minute video: **pending recording and upload**.
 - Public social post: **pending team publication**.
 

@@ -1,6 +1,6 @@
 # Recording plan — narrative first
 
-Recording path verified on the updated local backend; final public-backend refresh and check remain. Keep the video at or below two minutes. Preserve time to upload and check the public link.
+Recording path verified on the public site after the backend refresh. Keep the video at or below two minutes. Preserve time to upload and check the public link.
 
 ## The story
 
@@ -18,7 +18,7 @@ Optional memory line: “Hindsight keeps a persistent memory of the indexed arch
 4. Open a supporting moment and inspect the transcript. State that these are different framings within a broadly consistent stance, not a demonstrated reversal.
 5. Explain how the agent used the selected sources and acted within the archive.
 
-Real sources are recorded in `docs/demo-evidence.json`. Verified browser path: Home → Follow a story → Investigate this story → Compare these three moments. The real model called `read_sources`, received the three selected transcripts, called `play_moment`, and completed in 17.309 seconds with no browser JavaScript errors. This is one observed run, not a performance guarantee.
+Real sources are recorded in `docs/demo-evidence.json`. Verified browser path: Home → Follow a story → Investigate this story → Compare these three moments. The real model called `read_sources`, received the three selected transcripts, called `play_moment`, and completed in 17.309 seconds with no browser JavaScript errors. A subsequent public-site run completed in 15.377 seconds after the backend refresh. These are observed runs, not a performance guarantee.
 
 ## Timing
 
@@ -33,7 +33,7 @@ Real sources are recorded in `docs/demo-evidence.json`. Verified browser path: H
 
 The live draft-check agent received the current channel and a hypothetical script from the editor, rendered two conflicts, and opened source moments. A second live run finished in 34.336 seconds, compared with 54.152 seconds before the evidence-return change. It called `run_preflight` once and `play_moment` three times, with no duplicate `check_draft` call and no browser JavaScript errors. These are two observations, not a latency benchmark. The browser bridge returns the evidence already rendered. Its controlled success/failure/stale-draft tests also pass.
 
-Recording gate: the live response still labels unverified-speaker conflicts as reversals, while the local backend maps these to `archive_conflict`. Refresh the deployed backend and verify the corrected wording before recording this flow. Only one source moment is visible at a time; opening three moments does not display three simultaneous players.
+The public backend was refreshed to include the `archive_conflict` attribution fix and `read_sources`. Recheck the draft wording on the recording machine if using this secondary flow. Only one source moment is visible at a time; opening three moments does not display three simultaneous players.
 
 Do not try to fit a full second demo into the same two-minute video. Keep draft review available if the narrative flow cannot be made reliable within the code-freeze window.
 
